@@ -98,14 +98,17 @@ model IdempotencyKey {
 }
 
 // ─────────────────────────────────────────────
-// AUTHENTICATION DOMAIN (NextAuth)
+// AUTHENTICATION DOMAIN (NextAuth w/ Credentials)
 // ─────────────────────────────────────────────
 
 model User {
   id            String    @id @default(cuid())
+  firstName     String?   // Added for your custom credentials login
+  lastName      String?   // Added for your custom credentials login
   name          String?
   email         String?   @unique
   emailVerified DateTime?
+  passwordHash  String?   // Added for your custom credentials login
   image         String?
   role          UserRole  @default(USER)
   accounts      Account[]
