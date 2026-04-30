@@ -6,44 +6,83 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─────────────────────────────────────────────
+// ORDER DOMAIN
+// ─────────────────────────────────────────────
+
 model Order {
   id                String               @id @default(uuid())
   userId            String
-  shippingAddressId String      
-  currency          Currency             @default(NGN) 
-  subtotalKobo      Int         
+  shippingAddressId String
+  currency          Currency             @default(NGN)
+  subtotalKobo      Int
   totalKobo         Int                  // Stored in kobo/cents to prevent floating point math bugs
   status            OrderStatus          @default(PENDING)
-  items             OrderItem[]
-  statusHistory     OrderStatusHistory[] // Added for checkout.ts
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
 
-  // The idempotency key ensures if checkout is clicked twice, they only pay once
+  items             OrderItem[]
+  statusHistory     OrderStatusHistory[]
   idempotencyKey    IdempotencyKey?
-}
-
-// Added for checkout.ts to track status changes over time
-model OrderStatusHistory {
-  id        String      @id @default(uuid())
-  orderId   String
-  status    OrderStatus
-  note      String?
-  createdAt DateTime    @default(now())
-
-  order     Order       @relation(fields: [orderId], references: [id])
+  inventoryLedger   InventoryLedgerEntry[] 
 }
 
 model OrderItem {
   id          String   @id @default(uuid())
   orderId     String
   productId   String
+  variantId   String?  // Added from your checkout.ts
+  productSlug String   // Added from your checkout.ts
   name        String   // Snapshot of the product name at time of purchase
+  imageUrl    String?  // Added from your checkout.ts
   priceKobo   Int      // Snapshot of the price at time of purchase
   quantity    Int
 
   order       Order    @relation(fields: [orderId], references: [id])
 }
+
+model OrderStatusHistory {
+  id        String      @id @default(uuid())
+  orderId   String
+  status    OrderStatus 
+  note      String?
+  createdAt DateTime    @default(now())
+
+  order     Order       @relation(fields: [orderId], references: [id])
+}
+
+// ─────────────────────────────────────────────
+// INVENTORY DOMAIN (New!)
+// ─────────────────────────────────────────────
+
+model ProductInventory {
+  id                String                 @id @default(uuid())
+  productId         String
+  variantId         String                 @default("") 
+  quantityAvailable Int
+
+  ledgerEntries     InventoryLedgerEntry[]
+
+  // This ensures your code can find the exact item safely
+  @@unique([productId, variantId])
+}
+
+model InventoryLedgerEntry {
+  id           String       @id @default(uuid())
+  inventoryId  String
+  orderId      String
+  reason       LedgerReason
+  delta        Int
+  balanceAfter Int
+  createdAt    DateTime     @default(now())
+
+  inventory    ProductInventory @relation(fields: [inventoryId], references: [id])
+  order        Order            @relation(fields: [orderId], references: [id])
+}
+
+// ─────────────────────────────────────────────
+// INFRASTRUCTURE DOMAIN
+// ─────────────────────────────────────────────
 
 model IdempotencyKey {
   key          String            @id
@@ -58,6 +97,10 @@ model IdempotencyKey {
   orderId      String?           @unique 
   order        Order?            @relation(fields: [orderId], references: [id]) 
 }
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
 
 enum OrderStatus {
   PENDING
@@ -83,5 +126,6 @@ enum IdempotencyStatus {
   PENDING
   PROCESSING
   COMPLETED
+  SUCCEEDED // Added to support your checkout.ts logic!
   FAILED
 }
