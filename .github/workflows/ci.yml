@@ -1,0 +1,268 @@
+# .github/workflows/ci.yml
+# ─────────────────────────────────────────────
+# Runs on every push to main and on every PR.
+# Vercel is blocked from deploying main until
+# all jobs here pass.
+#
+# Job graph:
+#
+#   lint ──┐
+#           ├── test (needs lint + typecheck) ── deploy (needs test)
+#   typecheck ──┘
+#   prisma-validate ────────────────────────────────────────────────┘
+# ─────────────────────────────────────────────
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+  # These are safe test credentials — never use prod values here.
+  # Real secrets are injected via GitHub Secrets (see deploy job).
+  DATABASE_URL: postgresql://store_admin:supersecret@localhost:5432/store_db
+  MONGODB_URI:  mongodb://store_admin:supersecret@localhost:27017/store_products?authSource=admin
+  REDIS_URL:    redis://:supersecret@localhost:6379
+
+jobs:
+
+  # ─────────────────────────────────────────────
+  # Job 1 — Lint
+  # ─────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+  # ─────────────────────────────────────────────
+  # Job 2 — TypeScript
+  # ─────────────────────────────────────────────
+  typecheck:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: tsc --noEmit
+        run: npx tsc --noEmit
+
+  # ─────────────────────────────────────────────
+  # Job 3 — Prisma schema validation
+  # Catches drift between schema.prisma and the
+  # actual database before any code ships.
+  # ─────────────────────────────────────────────
+  prisma-validate:
+    name: Prisma schema
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER:     store_admin
+          POSTGRES_PASSWORD: supersecret
+          POSTGRES_DB:       store_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U store_admin -d store_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Prisma init SQL
+        run: |
+          PGPASSWORD=supersecret psql \
+            -h localhost -U store_admin -d store_db \
+            -f infra/postgres/init.sql
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      - name: Apply migrations (dry-run)
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Assert no schema drift
+        # If this fails, a developer changed schema.prisma without
+        # generating a migration file. Forces explicit migrations.
+        run: |
+          npx prisma migrate diff \
+            --from-migrations ./prisma/migrations \
+            --to-schema-datamodel ./prisma/schema.prisma \
+            --shadow-database-url "$DATABASE_URL" \
+            --exit-code
+
+  # ─────────────────────────────────────────────
+  # Job 4 — Tests (unit + integration)
+  # Spins up all three database services so
+  # integration tests run against real engines.
+  # ─────────────────────────────────────────────
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER:     store_admin
+          POSTGRES_PASSWORD: supersecret
+          POSTGRES_DB:       store_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U store_admin -d store_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mongo:
+        image: mongo:7
+        env:
+          MONGO_INITDB_ROOT_USERNAME: store_admin
+          MONGO_INITDB_ROOT_PASSWORD: supersecret
+          MONGO_INITDB_DATABASE:      store_products
+        ports: ['27017:27017']
+        options: >-
+          --health-cmd "mongosh --quiet --eval \"db.adminCommand('ping').ok\""
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports: ['6379:6379']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bootstrap Postgres schemas
+        run: |
+          PGPASSWORD=supersecret psql \
+            -h localhost -U store_admin -d store_db \
+            -f infra/postgres/init.sql
+
+      - name: Run Prisma migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run tests
+        run: npm test -- --coverage --forceExit
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          MONGODB_URI:  ${{ env.MONGODB_URI }}
+          REDIS_URL:    ${{ env.REDIS_URL }}
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────
+  # Job 5 — Deploy to Vercel (main branch only)
+  # Only runs after every other job passes.
+  # ─────────────────────────────────────────────
+  deploy:
+    name: Deploy → Vercel
+    runs-on: ubuntu-latest
+    needs: [test, prisma-validate]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Comment deployment URL on PR (if triggered by merge)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ steps.deploy.outputs.url }}';
+            const sha  = context.sha.slice(0, 7);
+            github.rest.repos.createCommitComment({
+              owner:   context.repo.owner,
+              repo:    context.repo.repo,
+              commit_sha: context.sha,
+              body: `✅ Deployed \`${sha}\` → ${url}`,
+            });v
