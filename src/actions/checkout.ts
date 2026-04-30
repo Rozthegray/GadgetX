@@ -105,7 +105,7 @@ export async function processCheckout(
       if (existingKey.status === IdempotencyStatus.PROCESSING) {
         return { success: false, error: 'Request already processing.', code: 'DUPLICATE_REQUEST' }
       }
-      if (existingKey.status === IdempotencyStatus.SUCCEEDED && existingKey.responseBody) {
+      if (existingKey.We crushed the Prisma schema validation! The database architecture is officially locked in and accepted by Vercel.
         return existingKey.responseBody as CheckoutResult
       }
     }
