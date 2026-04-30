@@ -164,7 +164,7 @@ export async function processCheckout(
             currency,
             subtotalKobo,
             totalKobo,
-            idempotencyKeyId: idem.id,
+            idempotencyKey: { connect: { key: idempotencyKey } },
             items: {
               create: items.map((item) => ({
                 productId:   item.productId,
