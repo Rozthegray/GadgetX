@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import mongoose from "mongoose";
 import Link from "next/link";
 import { Product } from "@/models/Product";
-import { ShieldCheck, Zap, ShoppingCart, ChevronRight, Check, Repeat } from "lucide-react";   act Helper to format kobo to NGN
+import { ShieldCheck, Zap, ShoppingCart, ChevronRight, Check, Repeat } from "lucide-react";  // act Helper to format kobo to NGN
 const formatNaira = (kobo: number) => {
   return new Intl.NumberFormat('en-NG', { 
     style: 'currency', 
