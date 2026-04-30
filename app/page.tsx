@@ -72,7 +72,7 @@ export default async function HomePage(props: {
       </div>
 
       {/* 2. HERO SECTION (Height Reduced & Copy Updated) */}
-      <section className="relative w-full h-[45vh] flex flex-col items-center justify-center overflow-hidden border-b border-zinc-900 px-4 text-center">
+      <section className="relative w-full h-[90vh] flex flex-col items-center justify-center overflow-hidden border-b border-zinc-900 px-4 text-center">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-black to-black opacity-80" />
         
         <div className="relative z-10 max-w-4xl">
