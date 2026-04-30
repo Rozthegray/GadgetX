@@ -83,13 +83,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
     // ── Google OAuth ─────────────────────────
     
+],
 
   callbacks: {
     // Inject id + role into the JWT on sign-in
     async jwt({ token, user }) {
       if (user) {
         token.id   = user.id
-        token.role = user.role ?? 'CUSTOMER'
+        token.role = user.role ?? 'USER'
       }
       return token
     },
@@ -104,3 +105,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 })
+  
