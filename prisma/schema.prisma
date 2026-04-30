@@ -7,19 +7,31 @@ datasource db {
 }
 
 model Order {
-  id                String      @id @default(uuid())
+  id                String               @id @default(uuid())
   userId            String
-  shippingAddressId String      // Added for checkout.ts
-  currency          Currency    @default(NGN) // Added for checkout.ts
-  subtotalKobo      Int         // Added for checkout.ts
-  totalKobo         Int         // Stored in kobo/cents to prevent floating point math bugs
-  status            OrderStatus @default(PENDING)
+  shippingAddressId String      
+  currency          Currency             @default(NGN) 
+  subtotalKobo      Int         
+  totalKobo         Int                  // Stored in kobo/cents to prevent floating point math bugs
+  status            OrderStatus          @default(PENDING)
   items             OrderItem[]
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  statusHistory     OrderStatusHistory[] // Added for checkout.ts
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
 
   // The idempotency key ensures if checkout is clicked twice, they only pay once
-  idempotencyKey IdempotencyKey?
+  idempotencyKey    IdempotencyKey?
+}
+
+// Added for checkout.ts to track status changes over time
+model OrderStatusHistory {
+  id        String      @id @default(uuid())
+  orderId   String
+  status    OrderStatus
+  note      String?
+  createdAt DateTime    @default(now())
+
+  order     Order       @relation(fields: [orderId], references: [id])
 }
 
 model OrderItem {
