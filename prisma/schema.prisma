@@ -32,13 +32,16 @@ model OrderItem {
 
 model IdempotencyKey {
   key          String            @id
-  orderId      String            @unique
+  userId       String            // Added for checkout.ts
+  requestPath  String            // Added for checkout.ts
   status       IdempotencyStatus @default(PENDING)
   responseBody Json?
+  expiresAt    DateTime          // Added for checkout.ts
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
 
-  order        Order             @relation(fields: [orderId], references: [id])
+  orderId      String?           @unique // Made optional
+  order        Order?            @relation(fields: [orderId], references: [id]) // Made optional
 }
 
 enum OrderStatus {
@@ -67,4 +70,3 @@ enum IdempotencyStatus {
   COMPLETED
   FAILED
 }
-
