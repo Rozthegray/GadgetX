@@ -7,13 +7,16 @@ datasource db {
 }
 
 model Order {
-  id            String      @id @default(uuid())
-  userId        String
-  totalKobo     Int         // Stored in kobo/cents to prevent floating point math bugs
-  status        OrderStatus @default(PENDING)
-  items         OrderItem[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id                String      @id @default(uuid())
+  userId            String
+  shippingAddressId String      // Added for checkout.ts
+  currency          Currency    @default(NGN) // Added for checkout.ts
+  subtotalKobo      Int         // Added for checkout.ts
+  totalKobo         Int         // Stored in kobo/cents to prevent floating point math bugs
+  status            OrderStatus @default(PENDING)
+  items             OrderItem[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 
   // The idempotency key ensures if checkout is clicked twice, they only pay once
   idempotencyKey IdempotencyKey?
@@ -32,16 +35,16 @@ model OrderItem {
 
 model IdempotencyKey {
   key          String            @id
-  userId       String            // Added for checkout.ts
-  requestPath  String            // Added for checkout.ts
+  userId       String            
+  requestPath  String            
   status       IdempotencyStatus @default(PENDING)
   responseBody Json?
-  expiresAt    DateTime          // Added for checkout.ts
+  expiresAt    DateTime          
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
 
-  orderId      String?           @unique // Made optional
-  order        Order?            @relation(fields: [orderId], references: [id]) // Made optional
+  orderId      String?           @unique 
+  order        Order?            @relation(fields: [orderId], references: [id]) 
 }
 
 enum OrderStatus {
