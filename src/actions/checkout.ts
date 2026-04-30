@@ -215,7 +215,7 @@ export async function processCheckout(
         }
 
         await tx.idempotencyKey.update({
-          where: { id: idem.id },
+          where: { key: idem.key },
           data: {
             status:       IdempotencyStatus.SUCCEEDED,
             responseBody: successResult,
