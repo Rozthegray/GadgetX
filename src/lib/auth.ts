@@ -16,16 +16,10 @@ declare module 'next-auth' {
 }
 
 // ─── Auth config ─────────────────────────────
-export const { handlers, auth, signIn, signOut } = NextAuth({
+const nextAuthResult = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
-  session: {
-    strategy: 'jwt',
-  },
-  pages: {
-    signIn:  '/login',
-    signOut: '/login',
-    error:   '/login',
-  },
+  session: { strategy: 'jwt' },
+  pages: { signIn: '/login', signOut: '/login', error: '/login' },
   providers: [
     Credentials({
       name: 'credentials',
@@ -77,4 +71,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 })
-  
+
+// ─── Version-Proof Exports ───────────────────
+// This forces GET and POST to exist, regardless of whether
+// Vercel installed NextAuth v4 or v5!
+export const handlers = (nextAuthResult as any).handlers || {
+  GET: nextAuthResult,
+  POST: nextAuthResult,
+}
+export const auth    = (nextAuthResult as any).auth
+export const signIn  = (nextAuthResult as any).signIn
+export const signOut = (nextAuthResult as any).signOut
