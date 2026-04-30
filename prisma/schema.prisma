@@ -44,3 +44,23 @@ enum OrderStatus {
   FAILED
   SHIPPED
 }
+
+
+enum Currency {
+  NGN
+  USD
+  EUR
+}
+
+enum LedgerReason {
+  PURCHASE
+  REFUND
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum IdempotencyStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
