@@ -82,11 +82,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
 
     // ── Google OAuth ─────────────────────────
-    Google({
-      clientId:     process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
+    
 
   callbacks: {
     // Inject id + role into the JWT on sign-in
