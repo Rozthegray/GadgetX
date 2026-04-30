@@ -34,7 +34,7 @@ declare module 'next-auth' {
 // ─── Auth config ─────────────────────────────
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapterThis is a classic "dependency hell" boss fight!
 
   session: {
     strategy: 'jwt',   // JWT is required when using Credentials provider
