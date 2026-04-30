@@ -1,27 +1,11 @@
-// src/lib/auth.ts
-// ─────────────────────────────────────────────
-// NextAuth v5 (Auth.js) configuration.
-// Supports:
-//   • Email/password (Credentials provider + bcrypt)
-//   • Google OAuth  (add GOOGLE_CLIENT_ID/SECRET to .env)
-//
-// The Prisma adapter writes sessions and accounts to
-// the `users` Postgres schema automatically.
-// ─────────────────────────────────────────────
-
 import NextAuth, { type DefaultSession } from 'next-auth'
 import { PrismaAdapter }                 from '@auth/prisma-adapter'
 import Credentials                       from 'next-auth/providers/credentials'
-import Google                            from 'next-auth/providers/google'
 import bcrypt                            from 'bcryptjs'
 import { z }                             from 'zod'
 import { prisma }                        from '@/lib/prisma'
 
 // ─── Extend session types ────────────────────
-// Add `id` and `role` to the session user so
-// Server Components can read them without an
-// extra database round-trip.
-
 declare module 'next-auth' {
   interface Session {
     user: { id: string; role: string } & DefaultSession['user']
@@ -32,22 +16,17 @@ declare module 'next-auth' {
 }
 
 // ─── Auth config ─────────────────────────────
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
   session: {
     strategy: 'jwt',
   },
-
   pages: {
     signIn:  '/login',
     signOut: '/login',
     error:   '/login',
   },
-
   providers: [
-
-    // ── Credentials (email + password) ───────
     Credentials({
       name: 'credentials',
       credentials: {
@@ -80,13 +59,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       },
     }),
-
-    // ── Google OAuth ─────────────────────────
-    
-],
-
+  ],
   callbacks: {
-    // Inject id + role into the JWT on sign-in
     async jwt({ token, user }) {
       if (user) {
         token.id   = user.id
@@ -94,8 +68,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token
     },
-
-    // Expose id + role on the session object
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id   = token.id   as string
