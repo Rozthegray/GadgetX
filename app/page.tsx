@@ -3,12 +3,11 @@ import mongoose from "mongoose";
 import { Product } from "@/models/Product"; 
 import { 
   Gamepad2, Repeat, Wrench, Zap, Crosshair, 
-  Search, Swords, ChevronRight, Flame, ChevronLeft, Smartphone
+  Search, Swords, ChevronRight, Flame, ChevronLeft, Smartphone, ShieldAlert, BatteryWarning, Activity
 } from "lucide-react";
 
 import VersusArena from "@/components/VersusArena";
 
-// Helper to format kobo to NGN
 const formatNaira = (kobo: number) => {
   return new Intl.NumberFormat('en-NG', { 
     style: 'currency', 
@@ -20,38 +19,172 @@ const formatNaira = (kobo: number) => {
 export default async function HomePage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // 1. Unwrap the searchParams Promise
   const searchParams = await props.searchParams;
 
-  // 2. Establish DB Connection
   if (mongoose.connection.readyState !== 1) {
     await mongoose.connect(process.env.MONGODB_URI as string);
   }
 
-  // 3. Pagination & Brand Logic
+  // ─── AUTO-SEED LOGIC ───
+  let totalProducts = await Product.countDocuments();
+  
+  if (totalProducts === 0) {
+    const initialProducts = [
+      { name: "iPhone 13 Pro Max (256GB)", slug: "iphone-13-pro-max-256gb", priceKobo: 72000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=iPhone+13+Pro+Max" }], specs: { authenticity: "UK Used" } },
+      { name: "Poco X6 Pro 5G", slug: "poco-x6-pro-5g", priceKobo: 45000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X6+Pro" }], specs: { authenticity: "New" } },
+      { name: "RedMagic 9 Pro Gaming Phone", slug: "redmagic-9-pro", priceKobo: 125000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=RedMagic+9+Pro" }], specs: { authenticity: "New" } },
+      { name: "Samsung Galaxy S24 Ultra", slug: "samsung-s24-ultra", priceKobo: 160000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=S24+Ultra" }], specs: { authenticity: "New" } },
+      { name: "Xiaomi Pad 6 (Gaming Tablet)", slug: "xiaomi-pad-6", priceKobo: 38000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+Pad+6" }], specs: { authenticity: "New" } },
+      { name: "BlackShark Magnetic Cooler 3 Pro", slug: "blackshark-cooler-3", priceKobo: 4500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=BlackShark+Cooler" }], specs: { authenticity: "New" } },
+      { name: "Sarafox V6 Carbon Fiber Thumb Sleeves", slug: "sarafox-v6-sleeves", priceKobo: 500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Sarafox+Sleeves" }], specs: { authenticity: "New" } },
+      { name: "Flydigi Vader 3 Pro Controller", slug: "flydigi-vader-3-pro", priceKobo: 7500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Flydigi+Vader" }], specs: { authenticity: "New" } }
+    ];
+    await Product.insertMany(initialProducts);
+    totalProducts = initialProducts.length; 
+  }
+
+  // ─── PAGE STATES ───
   const page = Number(searchParams.page) || 1;
   const limit = 16;
   const skip = (page - 1) * limit;
   const activeBrand = typeof searchParams.brand === 'string' ? searchParams.brand : 'Apple';
+  const activeGame = typeof searchParams.game === 'string' ? searchParams.game : 'CODM';
 
-  // 4. Fetch Data
-  const totalProducts = await Product.countDocuments({ status: 'published' });
   const totalPages = Math.ceil(totalProducts / limit);
   
-  // Latest Drops (Page 1)
-  const latestDrops = await Product.find({ status: 'published' })
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean();
+  const latestDrops = await Product.find({ status: 'published' }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
+  const brandProducts = await Product.find({ status: 'published', name: { $regex: activeBrand, $options: 'i' } }).limit(8).lean();
 
-  // Brand Specific Phones
-  const brandProducts = await Product.find({ 
-    status: 'published',
-    name: { $regex: activeBrand, $options: 'i' } // Simple search for brand in product name
-  })
-    .limit(8)
-    .lean();
+  // ─── DYNAMIC, DEEP ANALYTICS META DATABASE ───
+  const metaHardware = {
+    'CODM': [
+      {
+        name: 'RedMagic Gaming Tab 3 Pro', type: 'TABLET', price: '₦ 1,350,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=RedMagic+Astra+Tab',
+        desc: 'The absolute apex predator of Android gaming tablets.',
+        fps: '144 FPS (MP) / 120 FPS (BR)',
+        battery: 'Massive 10000mAh. Heavy drain at 144Hz.',
+        issue: 'Custom UI (GameSpace) can feel clunky.',
+        bugStatus: 'Global Whitelist: Fully unlocked by devs.'
+      },
+      {
+        name: 'iPad Pro (M1/M2)', type: 'TABLET', price: '₦ 1,800,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=iPad+Pro',
+        desc: 'The unquestioned Battle Royale tournament standard.',
+        fps: '120 FPS (MP) / 120 FPS (BR)',
+        battery: 'Highly efficient Apple Silicon. Low heat.',
+        issue: 'Mini-LED blooming in dark environments.',
+        bugStatus: 'Stable. No global bugs. iOS is fully optimized.'
+      },
+      {
+        name: 'ROG Phone 9 Pro', type: 'PHONE', price: '₦ 1,600,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=ROG+Phone+9',
+        desc: 'Hardware beast restricted by missing developer updates.',
+        fps: '120 FPS (MP) / 90 FPS (BR)',
+        battery: 'Moderate. AeroActive cooler drastically extends life.',
+        issue: 'Should natively run 144FPS, but restricted.',
+        bugStatus: 'Global Bug: CODM developers have not updated the whitelist for this model yet.'
+      },
+      {
+        name: 'Samsung Galaxy S24 Ultra', type: 'PHONE', price: '₦ 1,600,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=S24+Ultra',
+        desc: 'Mainstream titan with incredible display clarity.',
+        fps: '120 FPS (MP) / 90 FPS (BR)',
+        battery: 'Moderate drain. GOS throttles CPU to save battery.',
+        issue: 'Requires disabling GOS via ADB for stable frame pacing.',
+        bugStatus: 'Global Issue: Samsung aggressive thermal throttling.'
+      },
+      {
+        name: 'Poco X6 Pro', type: 'PHONE', price: '₦ 450,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=Poco+X6+Pro',
+        desc: 'The undisputed budget 120 FPS king.',
+        fps: '120 FPS (MP) / 90 FPS (BR)',
+        battery: 'High drain. Will require charging between tournament rounds.',
+        issue: '120 FPS setting sometimes disappears from menu.',
+        bugStatus: 'Global Bug: Server-side UI glitch temporarily hides 120Hz.'
+      }
+    ],
+    'PUBG': [
+      {
+        name: 'Samsung Galaxy S24 Ultra', type: 'PHONE', price: '₦ 1,600,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=S24+Ultra',
+        desc: 'Officially optimized for the massive 120 FPS PUBG update.',
+        fps: '120 FPS Locked',
+        battery: 'Moderate. Vapor chamber keeps it cool.',
+        issue: 'Screen can feel too flat for 4-finger claw users.',
+        bugStatus: 'Stable.'
+      },
+      {
+        name: 'iPhone 15 Pro Max', type: 'PHONE', price: '₦ 1,550,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=iPhone+15+PM',
+        desc: 'Sustains heavy firefights in Erangel final zones.',
+        fps: '120 FPS',
+        battery: 'Excellent. Titanium chassis dissipates heat well.',
+        issue: 'Aggressive auto-dimming during extreme heat.',
+        bugStatus: 'Global Issue: iOS thermal protection dims screen natively.'
+      },
+      {
+        name: 'Poco F6 Pro', type: 'PHONE', price: '₦ 650,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=Poco+F6+Pro',
+        desc: 'Snapdragon 8 Gen 2 dominates without thermal throttling.',
+        fps: '120 FPS',
+        battery: 'High drain. Gets hot during 120 FPS drop.',
+        issue: 'Battery degrades quickly if played while charging.',
+        bugStatus: 'Age/Hardware: Battery health drops after 8 months of heavy use.'
+      }
+    ],
+    'Free Fire': [
+      {
+        name: 'iPhone 13 Pro Max', type: 'PHONE', price: '₦ 720,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=iPhone+13+PM',
+        desc: 'The classic tournament standard for Free Fire.',
+        fps: '120 FPS',
+        battery: 'Was legendary, but UK Used models have weak health.',
+        issue: 'Lightning port wears out, touch ghosting if dropped.',
+        bugStatus: 'Age Factor: Battery degradation is common due to 2021 release date.'
+      },
+      {
+        name: 'Poco X6 Pro 5G', type: 'PHONE', price: '₦ 450,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=Poco+X6+Pro',
+        desc: 'Absolute overkill for Free Fire. Runs at Max effortlessly.',
+        fps: '90-120 FPS',
+        battery: 'Excellent. barely drains on FF engine.',
+        issue: 'MediaTek chip can run hot in sunny environments.',
+        bugStatus: 'Stable.'
+      },
+      {
+        name: 'Xiaomi Pad 6', type: 'TABLET', price: '₦ 380,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=Xiaomi+Pad+6',
+        desc: 'Tablet FOV advantage makes long-range headshots too easy.',
+        fps: '144 FPS',
+        battery: 'Solid 8840mAh. Lasts all day.',
+        issue: 'Heavy to hold for 4-finger claw without a stand.',
+        bugStatus: 'Stable. HyperOS update fixed previous frame drops.'
+      }
+    ],
+    'Blood Strike': [
+      {
+        name: 'ROG Phone 8 Pro', type: 'PHONE', price: '₦ 1,400,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=ROG+Phone+8',
+        desc: 'PC-like parkour movement using the 165Hz display.',
+        fps: '165 FPS',
+        battery: 'Extreme drain at 165Hz. Requires external cooler.',
+        issue: 'AirTrigger shoulder buttons sometimes fail to register.',
+        bugStatus: 'Global Bug: Software glitch with AirTrigger mapping.'
+      },
+      {
+        name: 'RedMagic 8S Pro', type: 'PHONE', price: '₦ 850,000',
+        image: 'https://placehold.co/600x400/18181b/ef4444?text=RedMagic+8S',
+        desc: 'Centrifugal fan keeps close-quarters combat stutter-free.',
+        fps: '120 FPS',
+        battery: 'Moderate. Fan helps preserve battery chemistry.',
+        issue: 'Cooling vent accumulates dust and gets loud over time.',
+        bugStatus: 'Age Factor: Internal fans require professional cleaning after 1 year.'
+      }
+    ]
+  };
+
+  const currentMeta = metaHardware[activeGame as keyof typeof metaHardware] || metaHardware['CODM'];
 
   return (
     <main className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-red-600 selection:text-white pb-24">
@@ -71,8 +204,8 @@ export default async function HomePage(props: {
         </div>
       </div>
 
-      {/* 2. HERO SECTION (Height Reduced & Copy Updated) */}
-      <section className="relative w-full h-[90vh] flex flex-col items-center justify-center overflow-hidden border-b border-zinc-900 px-4 text-center">
+      {/* 2. HERO SECTION */}
+      <section className="relative w-full h-[45vh] flex flex-col items-center justify-center overflow-hidden border-b border-zinc-900 px-4 text-center">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-black to-black opacity-80" />
         
         <div className="relative z-10 max-w-4xl">
@@ -113,7 +246,7 @@ export default async function HomePage(props: {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
             {latestDrops.map((item: any) => (
               <Link href={`/products/${item.slug}`} key={item._id.toString()} className="bg-zinc-900 border border-zinc-800 p-3 md:p-5 group hover:border-red-500 transition cursor-pointer flex flex-col">
-                <div className="aspect-square bg-zinc-950 mb-4 flex items-center justify-center overflow-hidden">
+                <div className="aspect-square bg-zinc-950 mb-4 flex items-center justify-center overflow-hidden relative">
                   <img 
                     src={item.images?.[0]?.url || '/images/placeholder.jpg'} 
                     alt={item.name}
@@ -132,34 +265,9 @@ export default async function HomePage(props: {
               </Link>
             ))}
           </div>
-
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-4 mt-12">
-              {page > 1 ? (
-                <Link href={`/?page=${page - 1}#inventory`} className="p-3 border border-zinc-800 hover:border-red-500 hover:text-red-500 transition">
-                  <ChevronLeft size={20} />
-                </Link>
-              ) : (
-                <div className="p-3 border border-zinc-900 text-zinc-700 cursor-not-allowed"><ChevronLeft size={20} /></div>
-              )}
-              
-              <div className="font-bold text-zinc-400">
-                Page <span className="text-white">{page}</span> of {totalPages}
-              </div>
-
-              {page < totalPages ? (
-                <Link href={`/?page=${page + 1}#inventory`} className="p-3 border border-zinc-800 hover:border-red-500 hover:text-red-500 transition">
-                  <ChevronRight size={20} />
-                </Link>
-              ) : (
-                <div className="p-3 border border-zinc-900 text-zinc-700 cursor-not-allowed"><ChevronRight size={20} /></div>
-              )}
-            </div>
-          )}
         </section>
 
-        {/* 4. BRAND TOGGLE SECTION (NEW) */}
+        {/* 4. BRAND TOGGLE SECTION */}
         <section id="brands">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 border-b border-zinc-900 pb-4">
             <h2 className="text-2xl md:text-3xl font-black uppercase flex items-center gap-3 w-full md:w-auto">
@@ -167,7 +275,7 @@ export default async function HomePage(props: {
             </h2>
             
             <div className="flex overflow-x-auto gap-2 pb-2 w-full md:w-auto scrollbar-hide">
-              {['Apple', 'Samsung', 'Xiaomi', 'Asus', 'RedMagic'].map((brand) => (
+              {['Apple', 'Samsung', 'Xiaomi', 'Poco', 'RedMagic'].map((brand) => (
                 <Link 
                   key={brand} 
                   href={`/?brand=${brand}#brands`}
@@ -213,30 +321,73 @@ export default async function HomePage(props: {
         {/* 5. INTERACTIVE VERSUS ARENA */}
         <VersusArena />
 
-        {/* 6. BEST DEVICES BY GAME */}
-        <section>
+        {/* 6. DYNAMIC DEEP ANALYTICS META HARDWARE */}
+        <section id="meta">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-black uppercase mb-2">Meta Hardware</h2>
-            <p className="text-zinc-400">Curated devices optimized for the top titles.</p>
+            <h2 className="text-3xl font-black uppercase mb-2">Esports Technical Reports</h2>
+            <p className="text-zinc-400">Deep-dive hardware analysis. Know exactly what you are buying.</p>
           </div>
           
           <div className="flex justify-center gap-2 md:gap-4 mb-8 flex-wrap">
-            {['CODM', 'PUBG', 'Free Fire', 'Blood Strike'].map((game, i) => (
-              <button key={game} className={`px-6 py-3 border font-bold uppercase text-sm ${i === 0 ? 'border-red-500 text-red-500 bg-red-500/10' : 'border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-white'}`}>
+            {Object.keys(metaHardware).map((game) => (
+              <Link 
+                key={game} 
+                href={`/?game=${game}#meta`}
+                className={`px-6 py-3 border font-bold uppercase text-sm transition ${
+                  activeGame === game 
+                  ? 'border-red-500 text-red-500 bg-red-500/10' 
+                  : 'border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-white'
+                }`}
+              >
                 {game}
-              </button>
+              </Link>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="bg-zinc-950 border border-zinc-900 p-6 flex flex-col items-center text-center group cursor-pointer hover:border-red-500 transition">
-                <div className="w-full aspect-video bg-zinc-900 mb-6 flex items-center justify-center text-zinc-800 border border-zinc-800 overflow-hidden">
-                  <img src="https://placehold.co/600x400/18181b/ef4444?text=CODM+META" alt="Meta Loadout" className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-50 group-hover:opacity-100" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentMeta.map((item) => (
+              <div key={item.name} className="bg-zinc-950 border border-zinc-900 flex flex-col group hover:border-red-500 transition relative overflow-hidden">
+                
+                {/* Visual Badge for TABLET vs PHONE */}
+                <div className="absolute top-4 left-4 bg-red-600 text-white text-[10px] font-black px-2 py-1 uppercase tracking-widest z-20">
+                  {item.type}
                 </div>
-                <h3 className="text-xl font-bold mb-2 group-hover:text-red-500 transition">iPhone 13 Pro Max</h3>
-                <p className="text-zinc-400 text-sm mb-4">Stable 90fps. Perfect gyro response. The competitive standard.</p>
-                <div className="text-lg font-bold text-white">Starts at ₦ 720,000</div>
+
+                <div className="w-full h-48 bg-zinc-900 flex items-center justify-center text-zinc-800 border-b border-zinc-800 relative">
+                  <div className="absolute inset-0 bg-red-600/5 group-hover:bg-red-600/10 transition z-10" />
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100" />
+                </div>
+                
+                <div className="p-5 flex flex-col grow">
+                  <h3 className="text-xl font-bold mb-1 group-hover:text-red-500 transition">{item.name}</h3>
+                  <p className="text-zinc-400 text-xs mb-4 leading-relaxed">{item.desc}</p>
+                  
+                  {/* Technical Data Grid */}
+                  <div className="w-full text-xs space-y-3 border-t border-zinc-800 pt-4 mt-auto">
+                    <div className="flex items-start gap-2">
+                      <Activity size={14} className="text-green-500 mt-0.5 shrink-0" />
+                      <div><span className="text-zinc-500">Target:</span> <span className="font-bold text-white block">{item.fps}</span></div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <BatteryWarning size={14} className="text-yellow-500 mt-0.5 shrink-0" />
+                      <div><span className="text-zinc-500">Drain:</span> <span className="font-bold text-zinc-300 block">{item.battery}</span></div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <ShieldAlert size={14} className="text-red-500 mt-0.5 shrink-0" />
+                      <div>
+                        <span className="text-zinc-500">Report:</span> 
+                        <span className="font-bold text-zinc-300 block mb-1">{item.issue}</span>
+                        <span className={`font-bold block ${item.bugStatus.includes('Bug') || item.bugStatus.includes('Issue') ? 'text-red-400' : item.bugStatus.includes('Age') ? 'text-orange-400' : 'text-green-400'}`}>
+                          {item.bugStatus}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-lg font-black text-center text-white py-3 bg-zinc-900 border-t border-zinc-800 w-full">
+                  {item.price}
+                </div>
               </div>
             ))}
           </div>
