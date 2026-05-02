@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { Product } from "@/models/Product"; 
 import { 
   Gamepad2, Repeat, Wrench, Zap, Crosshair, 
-  Search, Swords, ChevronRight, Flame, ChevronLeft, Smartphone, ShieldAlert, BatteryWarning, Activity, Filter, Cpu
+  Search, Swords, ChevronRight, Flame, ChevronLeft, Smartphone, ShieldAlert, Activity, Filter, Cpu, ShoppingCart
 } from "lucide-react";
 
 import VersusArena from "@/components/VersusArena";
@@ -22,7 +22,6 @@ export default async function HomePage(props: {
   const searchParams = await props.searchParams;
 
   try {
-    // 1. SAFELY CONNECT TO DB
     if (!process.env.MONGODB_URI) {
       throw new Error("MONGODB_URI is missing from Vercel Environment Variables.");
     }
@@ -30,10 +29,9 @@ export default async function HomePage(props: {
       await mongoose.connect(process.env.MONGODB_URI);
     }
 
-    // 2. AUTO-SEED LOGIC 
     let totalProducts = await Product.countDocuments();
     
-    // We force a re-seed if the count isn't exactly 32 so the new FPS data gets added!
+    // Auto-Seed Logic (Kept your exact data and FPS logic intact)
     if (totalProducts !== 32) { 
       await Product.deleteMany({}); 
 
@@ -89,8 +87,6 @@ export default async function HomePage(props: {
         let category = "phones"; 
         if (p.name.includes("Pad") || p.name.includes("Tab") || p.name.includes("Y700")) category = "tablets";
 
-        // 🔥 THE FPS CALCULATOR 🔥
-        // Automatically judges the FPS capability based on the processor for instant UI display
         let fpsTarget = "60 FPS Stable";
         const chip = p.specs.chipset.toLowerCase();
         if (chip.includes("8 gen 2") || chip.includes("8 gen 3") || chip.includes("8 elite") || chip.includes("9200") || chip.includes("9300") || chip.includes("9400") || chip.includes("8300") || chip.includes("8s gen 3")) {
@@ -125,10 +121,7 @@ export default async function HomePage(props: {
     const activePrice = typeof searchParams.price === 'string' ? searchParams.price : 'All';
 
     let query: any = { status: 'published' };
-    
-    if (activeBrand !== 'All') {
-      query.brand = activeBrand;
-    }
+    if (activeBrand !== 'All') query.brand = activeBrand;
     
     if (activePrice !== 'All') {
       if (activePrice === '200') query.priceKobo = { $lt: 20000000 };
@@ -143,54 +136,56 @@ export default async function HomePage(props: {
     const latestDrops = await Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
 
     return (
-      <main className="min-h-screen bg-black text-zinc-100 font-sans pb-24">
+      <main className="min-h-screen bg-black text-zinc-100 font-sans pb-24 selection:bg-red-600 selection:text-white">
         
-        {/* 1. TOP UTILITY BAR */}
-        <div className="w-full bg-zinc-950 border-b border-zinc-900 py-2">
-          <div className="max-w-7xl mx-auto px-4 flex justify-between items-center text-xs font-bold tracking-widest text-zinc-400 uppercase">
-            <div className="flex gap-6">
-              <Link href="/sell" className="hover:text-red-500 transition flex items-center gap-1"><Zap size={14} /> Sell</Link>
-              <Link href="/swap" className="hover:text-red-500 transition flex items-center gap-1"><Repeat size={14} /> Swap</Link>
+        {/* 1. TOP UTILITY BAR (Sleeker) */}
+        <div className="w-full bg-zinc-950 border-b border-zinc-900/50 py-2 sticky top-0 z-50 backdrop-blur-md bg-opacity-80">
+          <div className="max-w-7xl mx-auto px-4 flex justify-between items-center text-[10px] md:text-xs font-bold tracking-widest text-zinc-400 uppercase">
+            <div className="flex gap-4 md:gap-6">
+              <Link href="/sell" className="hover:text-red-500 transition flex items-center gap-1.5"><Zap size={12} /> Sell Device</Link>
+              <Link href="/swap" className="hover:text-red-500 transition flex items-center gap-1.5"><Repeat size={12} /> Swap</Link>
             </div>
-            <div className="text-red-500 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-              Live Inventory: {totalProducts}+ Devices
+            <div className="text-red-500 flex items-center gap-2 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+              Live Inventory: {totalProducts}
             </div>
           </div>
         </div>
 
-        {/* 2. HERO SECTION */}
-        <section className="relative w-full h-[45vh] flex flex-col items-center justify-center border-b border-zinc-900 px-4 text-center">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-black to-black opacity-80" />
+        {/* 2. 🔥 UPGRADED HERO SECTION 🔥 */}
+        <section className="relative w-full h-[55vh] flex flex-col items-center justify-center border-b border-zinc-900 px-4 text-center overflow-hidden">
+          {/* Advanced Gradient Background */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-red-900/20 via-black to-black" />
+          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black to-transparent z-0" />
           
-          <div className="relative z-10 max-w-4xl">
-            <div className="mb-4 inline-block px-3 py-1 border border-red-500/30 bg-red-500/10 text-red-500 text-sm font-bold tracking-widest uppercase">
-              Number one home for gaming Device
+          <div className="relative z-10 max-w-4xl flex flex-col items-center">
+            <div className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 border border-red-500/30 bg-red-500/10 text-red-500 text-xs md:text-sm font-black tracking-[0.2em] uppercase rounded-full shadow-[0_0_20px_rgba(220,38,38,0.2)]">
+              <Flame size={14} className="animate-pulse" /> Nigeria's #1 Esports Hardware Hub
             </div>
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-4 leading-none">
+            <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter mb-4 leading-[0.9]">
               Equip to <br className="md:hidden" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400">Eliminate.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-br from-red-500 to-orange-600 drop-shadow-[0_0_30px_rgba(220,38,38,0.3)]">Eliminate.</span>
             </h1>
-            <p className="text-lg md:text-xl text-zinc-400 font-light mb-8 max-w-2xl mx-auto">
-              <span className="text-white font-bold">Fast Shipping across Nigeria.</span>
+            <p className="text-sm md:text-lg text-zinc-400 font-medium mb-8 max-w-xl mx-auto tracking-wide">
+              Tournament-ready devices shipped fast. <br className="hidden md:block"/> No lag. No thermal throttling. No excuses.
             </p>
           </div>
         </section>
 
-        <div className="max-w-7xl mx-auto px-4 space-y-32 py-16">
+        <div className="max-w-7xl mx-auto px-4 space-y-24 py-12">
           
-          {/* 3. LATEST DROPS */}
+          {/* 3. LATEST DROPS & ADVANCED FILTERS */}
           <section id="inventory">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-zinc-900 pb-4 gap-4">
-              <h2 className="text-2xl md:text-3xl font-black uppercase flex items-center gap-3 w-full md:w-auto">
-                <Zap className="text-red-500" /> GadgetX Arsenal
+            {/* Filter Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-zinc-900 pb-6 gap-6 sticky top-[36px] bg-black/80 backdrop-blur-xl z-40 pt-4">
+              <h2 className="text-2xl md:text-3xl font-black uppercase flex items-center gap-3 w-full md:w-auto text-white drop-shadow-md">
+                <TargetIcon /> Arsenal
               </h2>
               
-              <div className="flex flex-col gap-2 w-full md:w-auto">
-                <span className="text-xs text-zinc-500 uppercase tracking-widest font-bold flex items-center gap-1"><Smartphone size={12}/> Brand</span>
-                <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
+              <div className="flex flex-col gap-3 w-full md:w-auto">
+                <div className="flex overflow-x-auto gap-2 pb-1 scrollbar-hide">
                   {['All', 'Xiaomi', 'Poco', 'Redmi', 'Samsung', 'ROG', 'Red Magic', 'Lenovo'].map((brand) => (
-                    <Link key={brand} href={`/?brand=${brand}&price=${activePrice}#inventory`} className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider border whitespace-nowrap transition ${activeBrand === brand ? 'border-red-500 text-red-500 bg-red-500/10' : 'border-zinc-800 text-zinc-500 hover:text-white'}`}>
+                    <Link key={brand} href={`/?brand=${brand}&price=${activePrice}#inventory`} className={`px-4 py-2 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-sm transition ${activeBrand === brand ? 'border border-red-500 text-red-500 bg-red-500/10 shadow-[0_0_10px_rgba(220,38,38,0.2)]' : 'border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600'}`}>
                       {brand}
                     </Link>
                   ))}
@@ -198,108 +193,137 @@ export default async function HomePage(props: {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-              <span className="text-xs text-zinc-500 uppercase tracking-widest font-bold flex items-center gap-1 shrink-0"><Filter size={12}/> Budget:</span>
+            {/* Budget Chips */}
+            <div className="flex items-center gap-2 mb-10 overflow-x-auto pb-2 scrollbar-hide">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-black flex items-center gap-1 shrink-0 mr-2"><Filter size={12}/> Budget:</span>
               {[
                 { label: 'Any', val: 'All' }, { label: 'Under ₦200k', val: '200' }, { label: '₦200k - ₦300k', val: '300' }, { label: '₦300k - ₦400k', val: '400' }, { label: '₦400k - ₦500k', val: '500' }, { label: '₦500k - ₦600k', val: '600' }, { label: '₦600k - ₦700k', val: '700' }, { label: '₦700k+', val: '700+' },
               ].map((tier) => (
-                <Link key={tier.val} href={`/?brand=${activeBrand}&price=${tier.val}#inventory`} className={`px-3 py-1 text-[10px] md:text-xs font-bold uppercase tracking-wider rounded-full transition whitespace-nowrap shrink-0 ${activePrice === tier.val ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'}`}>
+                <Link key={tier.val} href={`/?brand=${activeBrand}&price=${tier.val}#inventory`} className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-full transition whitespace-nowrap shrink-0 ${activePrice === tier.val ? 'bg-zinc-100 text-black shadow-md' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'}`}>
                   {tier.label}
                 </Link>
               ))}
             </div>
             
+            {/* 🔥 UPGRADED PRODUCT CARDS 🔥 */}
             {latestDrops.length > 0 ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {latestDrops.map((item: any) => (
-                  <Link href={`/products/${item.slug}`} key={item._id.toString()} className="bg-zinc-900 border border-zinc-800 p-3 md:p-5 group hover:border-red-500 transition flex flex-col relative overflow-hidden">
+                  <Link href={`/products/${item.slug}`} key={item._id.toString()} className="group relative flex flex-col bg-zinc-950 border border-zinc-800/80 hover:border-red-500/50 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_30px_rgba(220,38,38,0.15)] hover:-translate-y-1">
                     
-                    <div className="w-full aspect-square bg-zinc-950 mb-4 flex items-center justify-center overflow-hidden relative">
-                      {/* 🔥 NEW: CHIPSET BADGE 🔥 */}
-                      <div className="absolute top-2 left-2 bg-black/90 backdrop-blur border border-zinc-800 text-zinc-300 text-[9px] md:text-[10px] font-black px-2 py-1 uppercase tracking-widest z-20 flex items-center gap-1 rounded-sm shadow-xl">
+                    {/* Image Area */}
+                    <div className="w-full aspect-square bg-zinc-900/50 flex items-center justify-center p-6 relative">
+                      {/* Top Badges */}
+                      <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md border border-zinc-700/50 text-zinc-300 text-[9px] md:text-[10px] font-black px-2.5 py-1 uppercase tracking-widest z-20 flex items-center gap-1.5 rounded">
                         <Cpu size={10} className="text-red-500" /> {item.specs?.chipset || 'Flagship SoC'}
                       </div>
-
-                      {/* 🔥 NEW: INSTANT FPS BADGE 🔥 */}
-                      <div className="absolute top-2 right-2 bg-red-600/95 backdrop-blur border border-red-500 text-white text-[9px] md:text-[10px] font-black px-2 py-1 uppercase tracking-widest z-20 flex items-center gap-1 rounded-sm shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+                      
+                      <div className="absolute top-3 right-3 bg-gradient-to-r from-red-600 to-red-500 text-white text-[9px] md:text-[10px] font-black px-2.5 py-1 uppercase tracking-widest z-20 flex items-center gap-1.5 rounded shadow-[0_4px_10px_rgba(220,38,38,0.4)]">
                         <Activity size={10} /> {item.specs?.fps || 'Max FPS'}
                       </div>
 
-                      <img src={item.images?.[0]?.url || '/images/placeholder.jpg'} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-500 opacity-80 group-hover:opacity-100" />
+                      <img src={item.images?.[0]?.url || '/images/placeholder.jpg'} alt={item.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 drop-shadow-2xl" />
                     </div>
 
-                    <h3 className="text-xs md:text-sm font-bold text-zinc-300 mb-1 leading-tight">{item.name}</h3>
-                    <div className="mt-auto pt-3 text-sm md:text-xl font-black text-red-500">{formatNaira(item.priceKobo)}</div>
+                    {/* Glassmorphic Info Panel */}
+                    <div className="p-4 md:p-5 flex flex-col grow bg-gradient-to-b from-transparent to-black/80 backdrop-blur-sm border-t border-zinc-800/50">
+                      <h3 className="text-xs md:text-sm font-bold text-zinc-100 mb-2 leading-snug group-hover:text-red-400 transition-colors line-clamp-2">{item.name}</h3>
+                      <div className="mt-auto flex items-end justify-between pt-2">
+                        <div className="text-base md:text-xl font-black text-white tracking-tight">
+                          {formatNaira(item.priceKobo)}
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center group-hover:bg-red-600 group-hover:border-red-500 transition-colors">
+                          <ChevronRight size={14} className="text-white" />
+                        </div>
+                      </div>
+                    </div>
                   </Link>
                 ))}
               </div>
             ) : (
-              <div className="w-full py-24 border border-dashed border-zinc-800 flex flex-col items-center justify-center text-zinc-600 uppercase font-black text-xl">
-                No devices found in this price range.
+              <div className="w-full py-32 bg-zinc-950/50 border border-dashed border-zinc-800 rounded-2xl flex flex-col items-center justify-center text-zinc-500 uppercase font-black text-xl tracking-widest">
+                <Search size={48} className="mb-4 text-zinc-700" />
+                No Loadouts Found.
               </div>
             )}
           </section>
 
-          {/* 4. INTERACTIVE VERSUS ARENA */}
           <VersusArena />
 
-          {/* 5. 🔥 NEW: BUDGET STARTER COMBOS 🔥 */}
-          <section>
-            <div className="flex items-center gap-3 mb-8 border-b border-zinc-900 pb-4">
-              <Flame className="text-red-500" />
-              <h2 className="text-2xl md:text-3xl font-black uppercase">Budget Starter Combos</h2>
+          {/* 5. 🔥 UPGRADED BUDGET COMBOS CAROUSEL 🔥 */}
+          <section className="relative">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                <ShoppingCart className="text-red-500" size={24} />
+              </div>
+              <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight">Starter Loadouts</h2>
             </div>
             
-            <div className="flex overflow-x-auto gap-6 pb-6 scrollbar-hide snap-x">
+            <div className="flex overflow-x-auto gap-4 md:gap-6 pb-8 scrollbar-hide snap-x snap-mandatory">
               
               {/* Combo 1 */}
-              <div className="min-w-[320px] md:min-w-[400px] bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-6 shrink-0 snap-start group cursor-pointer hover:border-red-500 transition">
-                <div className="h-32 bg-zinc-950 mb-4 flex items-center justify-center text-zinc-800 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-red-600/5 group-hover:bg-red-600/10 transition z-10" />
-                  <img src="https://placehold.co/400x200/18181b/ef4444?text=BUNDLE" alt="Combo bundle" className="object-cover w-full h-full opacity-60" />
-                </div>
-                <h3 className="text-xl font-bold mb-1 group-hover:text-red-500 transition">The 120 FPS Starter Kit</h3>
-                <p className="text-zinc-500 text-xs mb-4">Poco X6 Pro + BlackShark Cooler 3 + Carbon Sleeves</p>
-                <div className="flex justify-between items-end">
-                  <div>
-                    <div className="text-zinc-600 line-through text-sm">₦ 360,000</div>
-                    <div className="text-2xl font-black text-red-500">₦ 345,000</div>
+              <div className="min-w-[85vw] md:min-w-[450px] bg-zinc-950 border border-zinc-800 hover:border-red-500/50 rounded-2xl p-1 shrink-0 snap-center group cursor-pointer transition-all duration-300">
+                <div className="h-40 md:h-48 bg-zinc-900 rounded-xl mb-4 flex items-center justify-center overflow-hidden relative border border-zinc-800/50">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
+                  <img src="https://placehold.co/800x400/18181b/ef4444?text=120+FPS+KIT" alt="Combo bundle" className="object-cover w-full h-full opacity-50 group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute bottom-4 left-4 z-20">
+                    <div className="bg-red-600 text-white text-[10px] font-black px-2 py-1 uppercase tracking-widest rounded-sm inline-block mb-2">Best Value</div>
                   </div>
-                  <button className="bg-white text-black p-2 hover:bg-zinc-200"><ChevronRight /></button>
+                </div>
+                <div className="px-4 pb-4">
+                  <h3 className="text-xl font-black mb-1 text-white">The 120 FPS Starter Kit</h3>
+                  <p className="text-zinc-400 text-xs mb-4 font-medium">Poco X6 Pro + BlackShark Cooler 3 + Carbon Sleeves</p>
+                  <div className="flex justify-between items-end pt-4 border-t border-zinc-800/50">
+                    <div>
+                      <div className="text-zinc-600 line-through text-xs font-bold mb-0.5">₦ 360,000</div>
+                      <div className="text-2xl font-black text-red-500">₦ 345,000</div>
+                    </div>
+                    <button className="bg-white text-black px-4 py-2 font-black uppercase text-xs rounded-full hover:bg-zinc-200 transition">View Kit</button>
+                  </div>
                 </div>
               </div>
 
               {/* Combo 2 */}
-              <div className="min-w-[320px] md:min-w-[400px] bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-6 shrink-0 snap-start group cursor-pointer hover:border-red-500 transition">
-                <div className="h-32 bg-zinc-950 mb-4 flex items-center justify-center text-zinc-800 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-red-600/5 group-hover:bg-red-600/10 transition z-10" />
-                  <img src="https://placehold.co/400x200/18181b/ef4444?text=BUNDLE" alt="Combo bundle" className="object-cover w-full h-full opacity-60" />
-                </div>
-                <h3 className="text-xl font-bold mb-1 group-hover:text-red-500 transition">The Pure Value Kit</h3>
-                <p className="text-zinc-500 text-xs mb-4">Redmi Note 13 Pro + Basic Flydigi Triggers</p>
-                <div className="flex justify-between items-end">
-                  <div>
-                    <div className="text-zinc-600 line-through text-sm">₦ 285,000</div>
-                    <div className="text-2xl font-black text-red-500">₦ 275,000</div>
+              <div className="min-w-[85vw] md:min-w-[450px] bg-zinc-950 border border-zinc-800 hover:border-red-500/50 rounded-2xl p-1 shrink-0 snap-center group cursor-pointer transition-all duration-300">
+                <div className="h-40 md:h-48 bg-zinc-900 rounded-xl mb-4 flex items-center justify-center overflow-hidden relative border border-zinc-800/50">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
+                  <img src="https://placehold.co/800x400/18181b/ef4444?text=PURE+VALUE" alt="Combo bundle" className="object-cover w-full h-full opacity-50 group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute bottom-4 left-4 z-20">
+                    <div className="bg-blue-600 text-white text-[10px] font-black px-2 py-1 uppercase tracking-widest rounded-sm inline-block mb-2">Entry Level</div>
                   </div>
-                  <button className="bg-white text-black p-2 hover:bg-zinc-200"><ChevronRight /></button>
+                </div>
+                <div className="px-4 pb-4">
+                  <h3 className="text-xl font-black mb-1 text-white">The Pure Value Kit</h3>
+                  <p className="text-zinc-400 text-xs mb-4 font-medium">Redmi Note 13 Pro + Basic Flydigi Triggers</p>
+                  <div className="flex justify-between items-end pt-4 border-t border-zinc-800/50">
+                    <div>
+                      <div className="text-zinc-600 line-through text-xs font-bold mb-0.5">₦ 285,000</div>
+                      <div className="text-2xl font-black text-red-500">₦ 275,000</div>
+                    </div>
+                    <button className="bg-white text-black px-4 py-2 font-black uppercase text-xs rounded-full hover:bg-zinc-200 transition">View Kit</button>
+                  </div>
                 </div>
               </div>
 
               {/* Combo 3 */}
-              <div className="min-w-[320px] md:min-w-[400px] bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-6 shrink-0 snap-start group cursor-pointer hover:border-red-500 transition">
-                <div className="h-32 bg-zinc-950 mb-4 flex items-center justify-center text-zinc-800 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-red-600/5 group-hover:bg-red-600/10 transition z-10" />
-                  <img src="https://placehold.co/400x200/18181b/ef4444?text=BUNDLE" alt="Combo bundle" className="object-cover w-full h-full opacity-60" />
-                </div>
-                <h3 className="text-xl font-bold mb-1 group-hover:text-red-500 transition">The Tryhard Pack</h3>
-                <p className="text-zinc-500 text-xs mb-4">Poco F6 Pro + Memo Cooler + Pro Sleeves</p>
-                <div className="flex justify-between items-end">
-                  <div>
-                    <div className="text-zinc-600 line-through text-sm">₦ 420,000</div>
-                    <div className="text-2xl font-black text-red-500">₦ 399,000</div>
+              <div className="min-w-[85vw] md:min-w-[450px] bg-zinc-950 border border-zinc-800 hover:border-red-500/50 rounded-2xl p-1 shrink-0 snap-center group cursor-pointer transition-all duration-300">
+                <div className="h-40 md:h-48 bg-zinc-900 rounded-xl mb-4 flex items-center justify-center overflow-hidden relative border border-zinc-800/50">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
+                  <img src="https://placehold.co/800x400/18181b/ef4444?text=TRYHARD+PACK" alt="Combo bundle" className="object-cover w-full h-full opacity-50 group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute bottom-4 left-4 z-20">
+                    <div className="bg-orange-600 text-white text-[10px] font-black px-2 py-1 uppercase tracking-widest rounded-sm inline-block mb-2">Sweaty Kit</div>
                   </div>
-                  <button className="bg-white text-black p-2 hover:bg-zinc-200"><ChevronRight /></button>
+                </div>
+                <div className="px-4 pb-4">
+                  <h3 className="text-xl font-black mb-1 text-white">The Tryhard Pack</h3>
+                  <p className="text-zinc-400 text-xs mb-4 font-medium">Poco F6 Pro + Memo Cooler + Pro Sleeves</p>
+                  <div className="flex justify-between items-end pt-4 border-t border-zinc-800/50">
+                    <div>
+                      <div className="text-zinc-600 line-through text-xs font-bold mb-0.5">₦ 420,000</div>
+                      <div className="text-2xl font-black text-red-500">₦ 399,000</div>
+                    </div>
+                    <button className="bg-white text-black px-4 py-2 font-black uppercase text-xs rounded-full hover:bg-zinc-200 transition">View Kit</button>
+                  </div>
                 </div>
               </div>
 
@@ -322,4 +346,15 @@ export default async function HomePage(props: {
       </div>
     );
   }
-                                                                                                                                                                                             }
+}
+
+// Just a tiny custom icon for the header!
+function TargetIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
+      <circle cx="12" cy="12" r="10"/>
+      <circle cx="12" cy="12" r="6"/>
+      <circle cx="12" cy="12" r="2"/>
+    </svg>
+  )
+                                                                                                                }
