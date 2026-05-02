@@ -33,10 +33,10 @@ export default async function HomePage(props: {
     // 2. AUTO-SEED LOGIC 
     let totalProducts = await Product.countDocuments();
     
-    if (totalProducts < 50) { 
+    if (totalProducts < 40) { 
       await Product.deleteMany({}); 
 
-      const initialProducts = [
+      const rawProducts = [
         { name: "Xiaomi 15T Pro (512GB)", slug: "xiaomi-15t-pro", priceKobo: 82000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+15T+Pro" }], specs: { authenticity: "New", chipset: "Dimensity 9400+" } },
         { name: "Xiaomi 15 (512GB)", slug: "xiaomi-15-512", priceKobo: 65500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+15" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Elite" } },
         { name: "Xiaomi 14 Pro (1TB)", slug: "xiaomi-14-pro", priceKobo: 86000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+14+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 3" } },
@@ -49,32 +49,15 @@ export default async function HomePage(props: {
         { name: "Xiaomi 13T (256GB)", slug: "xiaomi-13t", priceKobo: 29000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+13T" }], specs: { authenticity: "New", chipset: "Dimensity 8200 Ultra" } },
         { name: "Xiaomi 13 Lite 5G (256GB)", slug: "xiaomi-13-lite", priceKobo: 24000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+13+Lite" }], specs: { authenticity: "New", chipset: "Snapdragon 7 Gen 1" } },
         { name: "Xiaomi 12 Pro (256GB)", slug: "xiaomi-12-pro", priceKobo: 26800000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+12+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 1" } },
-        { name: "Xiaomi 12 (256GB)", slug: "xiaomi-12", priceKobo: 26000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+12" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 1" } },
-        { name: "Xiaomi 11T Pro (256GB)", slug: "xiaomi-11t-pro", priceKobo: 21000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+11T+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 888" } },
-        { name: "Xiaomi 11T (256GB)", slug: "xiaomi-11t", priceKobo: 19000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+11T" }], specs: { authenticity: "New", chipset: "Dimensity 1200" } },
-        { name: "Xiaomi 11i (256GB)", slug: "xiaomi-11i", priceKobo: 17000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+11i" }], specs: { authenticity: "New", chipset: "Dimensity 920" } },
-        { name: "Xiaomi 11 Lite (128GB)", slug: "xiaomi-11-lite", priceKobo: 15000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+11+Lite" }], specs: { authenticity: "New", chipset: "Snapdragon 732G" } },
-        { name: "Xiaomi 10T Lite (128GB)", slug: "xiaomi-10t-lite", priceKobo: 14800000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+10T+Lite" }], specs: { authenticity: "New", chipset: "Snapdragon 750G" } },
         { name: "Poco F8 Pro (512GB)", slug: "poco-f8-pro", priceKobo: 83200000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+F8+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Elite" } },
         { name: "Poco F6 Pro (512GB)", slug: "poco-f6-pro", priceKobo: 39500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+F6+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 2" } },
         { name: "Poco F6 (512GB)", slug: "poco-f6", priceKobo: 31500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+F6" }], specs: { authenticity: "New", chipset: "Snapdragon 8s Gen 3" } },
         { name: "Poco F5 (256GB)", slug: "poco-f5", priceKobo: 24000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+F5" }], specs: { authenticity: "New", chipset: "Snapdragon 7+ Gen 2" } },
         { name: "Poco X7 Pro (256GB)", slug: "poco-x7-pro", priceKobo: 28000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X7+Pro" }], specs: { authenticity: "New", chipset: "Dimensity 8400-Ultra" } },
-        { name: "Poco X7 (256GB)", slug: "poco-x7", priceKobo: 28000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X7" }], specs: { authenticity: "New", chipset: "Dimensity 7300-Ultra" } },
         { name: "Poco X6 Pro (512GB)", slug: "poco-x6-pro", priceKobo: 31000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X6+Pro" }], specs: { authenticity: "New", chipset: "Dimensity 8300 Ultra" } },
-        { name: "Poco X6 (128GB)", slug: "poco-x6", priceKobo: 18600000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X6" }], specs: { authenticity: "New", chipset: "Snapdragon 7s Gen 2" } },
-        { name: "Poco X5 (256GB)", slug: "poco-x5", priceKobo: 20000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X5" }], specs: { authenticity: "New", chipset: "Snapdragon 695" } },
-        { name: "Poco X4 GT (256GB)", slug: "poco-x4-gt", priceKobo: 21500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X4+GT" }], specs: { authenticity: "New", chipset: "Dimensity 8100" } },
-        { name: "Poco X4 Pro (256GB)", slug: "poco-x4-pro", priceKobo: 17000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X4+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 695" } },
-        { name: "Poco M8 (512GB)", slug: "poco-m8", priceKobo: 30000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+M8" }], specs: { authenticity: "New", chipset: "Helio G99" } },
         { name: "Redmi Note 14 Pro (512GB)", slug: "redmi-note-14-pro", priceKobo: 30300000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Redmi+Note+14+Pro" }], specs: { authenticity: "New", chipset: "Dimensity 7300 Ultra" } },
         { name: "Redmi Note 13 Pro (512GB)", slug: "redmi-note-13-pro", priceKobo: 27000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Redmi+Note+13+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 7s Gen 2" } },
-        { name: "Redmi Note 11 Pro+ (256GB)", slug: "redmi-note-11-pro-plus", priceKobo: 20000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Redmi+Note+11+Pro%2B" }], specs: { authenticity: "New", chipset: "Dimensity 920" } },
-        { name: "Redmi Note 11 Pro (128GB)", slug: "redmi-note-11-pro", priceKobo: 15500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Redmi+Note+11+Pro" }], specs: { authenticity: "New", chipset: "Helio G96" } },
-        { name: "Redmi 15 (256GB)", slug: "redmi-15", priceKobo: 25000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Redmi+15" }], specs: { authenticity: "New", chipset: "Snapdragon 4 Gen 2" } },
         { name: "Samsung S23 Ultra (256GB)", slug: "samsung-s23-ultra", priceKobo: 63000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+S23+Ultra" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 2" } },
-        { name: "Samsung S23+ (256GB)", slug: "samsung-s23-plus", priceKobo: 45500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+S23%2B" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 2" } },
-        { name: "Samsung S23 (256GB)", slug: "samsung-s23", priceKobo: 42000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+S23" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 2" } },
         { name: "Samsung S22 Ultra (128GB)", slug: "samsung-s22-ultra", priceKobo: 44500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+S22+Ultra" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 1" } },
         { name: "Samsung A55 (256GB)", slug: "samsung-a55", priceKobo: 37000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+A55" }], specs: { authenticity: "New", chipset: "Exynos 1480" } },
         { name: "Honor Magic 6 Pro (1TB)", slug: "honor-magic-6-pro", priceKobo: 68000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Honor+Magic+6+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 3" } },
@@ -87,7 +70,35 @@ export default async function HomePage(props: {
         { name: "Asus ROG 9", slug: "asus-rog-9", priceKobo: 150000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Asus+ROG+9" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Elite" } },
         { name: "Lenovo Y700 Gen 3", slug: "lenovo-y700-gen-3", priceKobo: 50000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Lenovo+Y700+Gen+3" }], specs: { authenticity: "New", chipset: "Snap 8 Gen 3" } }
       ];
-      await Product.insertMany(initialProducts);
+
+      // 🔥 THE MAGIC FIX: Automatically detect brand, category, and write descriptions!
+      const processedProducts = rawProducts.map(p => {
+        let brand = "Other";
+        if (p.name.includes("Xiaomi")) brand = "Xiaomi";
+        else if (p.name.includes("Poco")) brand = "Poco";
+        else if (p.name.includes("Redmi")) brand = "Redmi";
+        else if (p.name.includes("Samsung")) brand = "Samsung";
+        else if (p.name.includes("Honor")) brand = "Honor";
+        else if (p.name.includes("Oppo")) brand = "Oppo";
+        else if (p.name.includes("Vivo") || p.name.includes("iQOO")) brand = "Vivo";
+        else if (p.name.includes("Realme")) brand = "Realme";
+        else if (p.name.includes("Red Magic")) brand = "RedMagic";
+        else if (p.name.includes("ROG") || p.name.includes("Asus")) brand = "Asus";
+        else if (p.name.includes("Lenovo")) brand = "Lenovo";
+
+        let category = "Smartphone";
+        if (p.name.includes("Pad") || p.name.includes("Tab") || p.name.includes("Y700")) category = "Tablet";
+
+        return {
+          ...p,
+          brand: brand,
+          category: category,
+          description: `Experience incredible mobile gaming performance with the ${p.name}. Powered by the highly capable ${p.specs.chipset} chipset, this device is optimized to give you a massive competitive advantage in CODM, PUBG, and Free Fire.`
+        };
+      });
+
+      // Now insert the perfectly formatted products
+      await Product.insertMany(processedProducts);
     }
 
     // ─── QUERY LOGIC & FILTERS ───
@@ -101,7 +112,7 @@ export default async function HomePage(props: {
     let query: any = { status: 'published' };
     
     if (activeBrand !== 'All') {
-      query.name = { $regex: activeBrand, $options: 'i' };
+      query.brand = activeBrand; // We can actually use the DB brand field now!
     }
     
     if (activePrice !== 'All') {
@@ -202,8 +213,6 @@ export default async function HomePage(props: {
     );
 
   } catch (error: any) {
-    // 🔥 THE DEBUG CATCHER 🔥
-    // If anything fails (database connection, validation error, strict schema check), it prints here.
     return (
       <div className="min-h-screen bg-black text-red-500 p-10 font-mono flex flex-col items-center justify-center">
         <ShieldAlert size={64} className="mb-4 text-red-600 animate-pulse" />
