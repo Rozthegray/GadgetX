@@ -3,9 +3,8 @@ import mongoose from "mongoose";
 import { Product } from "@/models/Product"; 
 import { 
   Gamepad2, Repeat, Wrench, Zap, Crosshair, 
-  Search, Swords, ChevronRight, Flame, ChevronLeft, Smartphone, ShieldAlert, BatteryWarning, Activity, Filter
+  Search, Swords, ChevronRight, Flame, ChevronLeft, Smartphone, ShieldAlert, BatteryWarning, Activity, Filter, Cpu
 } from "lucide-react";
-
 import VersusArena from "@/components/VersusArena";
 
 const formatNaira = (kobo: number) => {
