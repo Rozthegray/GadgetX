@@ -1,28 +1,22 @@
-'use client'; // We need this to handle the Mobile Sidebar state
+'use client'; 
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { 
   Zap, Repeat, Search, ChevronRight, Flame, Smartphone, 
-  Activity, Filter, Cpu, ShoppingCart, Menu, X, Instagram, Twitter, ShieldCheck
+  Activity, Filter, Cpu, ShoppingCart, Menu, X, ShieldCheck, Globe, MessageCircle
 } from "lucide-react";
 
 import VersusArena from "@/components/VersusArena";
 
-// --- CLIENT-SIDE FETCHING FOR SEED & DATA ---
-// Because we changed to 'use client' for the sidebar, we move the DB fetch to a useEffect.
 export default function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  // Filters
   const [activeBrand, setActiveBrand] = useState('All');
   const [activePrice, setActivePrice] = useState('All');
 
-  // Dummy Data for immediate render (replaces DB seed for purely visual client-side)
-  // In a real production app with 'use client', you'd fetch this from an API route. 
-  // I have hardcoded the exact devices you wanted with REAL looking images!
   useEffect(() => {
     const rawProducts = [
       { id: 1, name: "Xiaomi 15T Pro (512GB)", slug: "xiaomi-15t-pro", priceKobo: 82000000, images: [{ url: "https://images.unsplash.com/photo-1598327105666-5b89351cb315?w=600&q=80" }], specs: { chipset: "Dimensity 9400+" } },
@@ -62,7 +56,6 @@ export default function HomePage() {
     return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(kobo / 100);
   };
 
-  // Filter Logic
   const filteredProducts = products.filter(p => {
     if (activeBrand !== 'All' && p.brand !== activeBrand) return false;
     if (activePrice !== 'All') {
@@ -81,7 +74,6 @@ export default function HomePage() {
       {/* ─── NAVBAR & SIDEBAR ─── */}
       <nav className="w-full bg-black/90 backdrop-blur-xl border-b border-zinc-900 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="bg-red-600 p-1.5 rounded-md">
               <Zap size={20} className="text-white fill-white" />
@@ -89,7 +81,6 @@ export default function HomePage() {
             <span className="font-black text-xl tracking-tighter uppercase">Gadget<span className="text-red-500">X</span></span>
           </Link>
 
-          {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8 font-bold text-sm tracking-widest uppercase text-zinc-400">
             <Link href="#inventory" className="hover:text-white transition">Shop</Link>
             <Link href="/sell" className="hover:text-white transition">Sell</Link>
@@ -97,7 +88,6 @@ export default function HomePage() {
             <Link href="/repair" className="hover:text-white transition">Repair</Link>
           </div>
 
-          {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
             <button className="text-zinc-400 hover:text-white"><Search size={20}/></button>
             <button className="text-zinc-400 hover:text-white relative">
@@ -106,16 +96,14 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* Mobile Hamburger */}
           <button className="md:hidden text-white" onClick={() => setIsSidebarOpen(true)}>
             <Menu size={28} />
           </button>
         </div>
       </nav>
 
-      {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z[100] flex justify-end">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex justify-end">
           <div className="w-72 h-full bg-zinc-950 border-l border-zinc-900 p-6 flex flex-col animate-in slide-in-from-right duration-300">
             <div className="flex justify-between items-center mb-12">
               <span className="font-black text-xl tracking-tighter uppercase">Menu</span>
@@ -194,7 +182,6 @@ export default function HomePage() {
               {filteredProducts.map((item: any) => (
                 <Link href={`/products/${item.slug}`} key={item.id} className="group relative flex flex-col bg-zinc-950 border border-zinc-800/80 hover:border-red-500/50 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_30px_rgba(220,38,38,0.15)] hover:-translate-y-1">
                   
-                  {/* Fixed Image Area with proper cropping */}
                   <div className="w-full aspect-[4/5] bg-zinc-900 flex items-center justify-center p-4 relative overflow-hidden">
                     <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md border border-zinc-700/50 text-zinc-300 text-[9px] md:text-[10px] font-black px-2.5 py-1 uppercase tracking-widest z-20 flex items-center gap-1.5 rounded">
                       <Cpu size={10} className="text-red-500" /> {item.specs?.chipset}
@@ -202,7 +189,6 @@ export default function HomePage() {
                     <div className="absolute top-3 right-3 bg-gradient-to-r from-red-600 to-red-500 text-white text-[9px] md:text-[10px] font-black px-2.5 py-1 uppercase tracking-widest z-20 flex items-center gap-1.5 rounded shadow-[0_4px_10px_rgba(220,38,38,0.4)]">
                       <Activity size={10} /> {item.specs?.fps}
                     </div>
-                    {/* Using object-cover for stunning aesthetics without breaking layout */}
                     <img src={item.images?.[0]?.url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" />
                   </div>
 
@@ -261,8 +247,8 @@ export default function HomePage() {
               Equipping Nigerian mobile athletes with premium, unthrottled hardware. We don't just sell phones, we sell competitive advantages.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:bg-red-600 hover:border-red-500 transition text-white"><Instagram size={18}/></a>
-              <a href="#" className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:bg-red-600 hover:border-red-500 transition text-white"><Twitter size={18}/></a>
+              <a href="#" className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:bg-red-600 hover:border-red-500 transition text-white"><Globe size={18}/></a>
+              <a href="#" className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:bg-red-600 hover:border-red-500 transition text-white"><MessageCircle size={18}/></a>
             </div>
           </div>
 
