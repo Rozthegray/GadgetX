@@ -33,7 +33,8 @@ export default async function HomePage(props: {
     // 2. AUTO-SEED LOGIC 
     let totalProducts = await Product.countDocuments();
     
-    if (totalProducts < 40) { 
+    // We force a re-seed if the count isn't exactly 32 so the new FPS data gets added!
+    if (totalProducts !== 32) { 
       await Product.deleteMany({}); 
 
       const rawProducts = [
@@ -71,7 +72,6 @@ export default async function HomePage(props: {
         { name: "Lenovo Y700 Gen 3", slug: "lenovo-y700-gen-3", priceKobo: 50000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Lenovo+Y700+Gen+3" }], specs: { authenticity: "New", chipset: "Snap 8 Gen 3" } }
       ];
 
-      // 🔥 FINAL ENUM FIX: Changed to "phones" and "tablets" EXACTLY as your database demands
       const processedProducts = rawProducts.map(p => {
         let brand = "Other";
         if (p.name.includes("Xiaomi")) brand = "Xiaomi";
@@ -86,14 +86,29 @@ export default async function HomePage(props: {
         else if (p.name.includes("ROG") || p.name.includes("Asus")) brand = "Asus";
         else if (p.name.includes("Lenovo")) brand = "Lenovo";
 
-        // *** PLURAL LOWERCASE TO MATCH YOUR DB! ***
         let category = "phones"; 
         if (p.name.includes("Pad") || p.name.includes("Tab") || p.name.includes("Y700")) category = "tablets";
+
+        // 🔥 THE FPS CALCULATOR 🔥
+        // Automatically judges the FPS capability based on the processor for instant UI display
+        let fpsTarget = "60 FPS Stable";
+        const chip = p.specs.chipset.toLowerCase();
+        if (chip.includes("8 gen 2") || chip.includes("8 gen 3") || chip.includes("8 elite") || chip.includes("9200") || chip.includes("9300") || chip.includes("9400") || chip.includes("8300") || chip.includes("8s gen 3")) {
+            fpsTarget = "120 FPS Capable";
+        } else if (chip.includes("8 gen 1") || chip.includes("888") || chip.includes("8100") || chip.includes("8200") || chip.includes("7+ gen 2") || chip.includes("7 gen 3") || chip.includes("tensor g4") || chip.includes("8400") || chip.includes("8350")) {
+            fpsTarget = "90 FPS Stable";
+        } else if (chip.includes("1200") || chip.includes("7s gen 2") || chip.includes("920") || chip.includes("g99") || chip.includes("1380") || chip.includes("1480") || chip.includes("7300") || chip.includes("7 gen 1")) {
+            fpsTarget = "60-90 FPS";
+        }
 
         return {
           ...p,
           brand: brand,
           category: category,
+          specs: {
+            ...p.specs,
+            fps: fpsTarget
+          },
           description: `Experience incredible mobile gaming performance with the ${p.name}. Powered by the highly capable ${p.specs.chipset} chipset, this device is optimized to give you a massive competitive advantage in CODM, PUBG, and Free Fire.`
         };
       });
@@ -146,15 +161,24 @@ export default async function HomePage(props: {
 
         {/* 2. HERO SECTION */}
         <section className="relative w-full h-[45vh] flex flex-col items-center justify-center border-b border-zinc-900 px-4 text-center">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-black to-black opacity-80" />
+          
           <div className="relative z-10 max-w-4xl">
+            <div className="mb-4 inline-block px-3 py-1 border border-red-500/30 bg-red-500/10 text-red-500 text-sm font-bold tracking-widest uppercase">
+              Number one home for gaming Device
+            </div>
             <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-4 leading-none">
               Equip to <br className="md:hidden" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400">Eliminate.</span>
             </h1>
+            <p className="text-lg md:text-xl text-zinc-400 font-light mb-8 max-w-2xl mx-auto">
+              <span className="text-white font-bold">Fast Shipping across Nigeria.</span>
+            </p>
           </div>
         </section>
 
         <div className="max-w-7xl mx-auto px-4 space-y-32 py-16">
+          
           {/* 3. LATEST DROPS */}
           <section id="inventory">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-zinc-900 pb-4 gap-4">
@@ -189,13 +213,22 @@ export default async function HomePage(props: {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                 {latestDrops.map((item: any) => (
                   <Link href={`/products/${item.slug}`} key={item._id.toString()} className="bg-zinc-900 border border-zinc-800 p-3 md:p-5 group hover:border-red-500 transition flex flex-col relative overflow-hidden">
-                    <div className="absolute top-2 left-2 bg-black/80 backdrop-blur border border-zinc-800 text-red-500 text-[9px] md:text-[10px] font-black px-2 py-1 uppercase tracking-widest z-20 flex items-center gap-1">
-                      <Cpu size={10} /> {item.specs?.chipset || 'Flagship SoC'}
-                    </div>
-                    <div className="w-full aspect-square bg-zinc-950 mb-4 flex items-center justify-center overflow-hidden">
+                    
+                    <div className="w-full aspect-square bg-zinc-950 mb-4 flex items-center justify-center overflow-hidden relative">
+                      {/* 🔥 NEW: CHIPSET BADGE 🔥 */}
+                      <div className="absolute top-2 left-2 bg-black/90 backdrop-blur border border-zinc-800 text-zinc-300 text-[9px] md:text-[10px] font-black px-2 py-1 uppercase tracking-widest z-20 flex items-center gap-1 rounded-sm shadow-xl">
+                        <Cpu size={10} className="text-red-500" /> {item.specs?.chipset || 'Flagship SoC'}
+                      </div>
+
+                      {/* 🔥 NEW: INSTANT FPS BADGE 🔥 */}
+                      <div className="absolute top-2 right-2 bg-red-600/95 backdrop-blur border border-red-500 text-white text-[9px] md:text-[10px] font-black px-2 py-1 uppercase tracking-widest z-20 flex items-center gap-1 rounded-sm shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+                        <Activity size={10} /> {item.specs?.fps || 'Max FPS'}
+                      </div>
+
                       <img src={item.images?.[0]?.url || '/images/placeholder.jpg'} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-500 opacity-80 group-hover:opacity-100" />
                     </div>
-                    <h3 className="text-xs md:text-sm font-bold text-zinc-300 mb-1">{item.name}</h3>
+
+                    <h3 className="text-xs md:text-sm font-bold text-zinc-300 mb-1 leading-tight">{item.name}</h3>
                     <div className="mt-auto pt-3 text-sm md:text-xl font-black text-red-500">{formatNaira(item.priceKobo)}</div>
                   </Link>
                 ))}
@@ -207,33 +240,86 @@ export default async function HomePage(props: {
             )}
           </section>
 
+          {/* 4. INTERACTIVE VERSUS ARENA */}
           <VersusArena />
+
+          {/* 5. 🔥 NEW: BUDGET STARTER COMBOS 🔥 */}
+          <section>
+            <div className="flex items-center gap-3 mb-8 border-b border-zinc-900 pb-4">
+              <Flame className="text-red-500" />
+              <h2 className="text-2xl md:text-3xl font-black uppercase">Budget Starter Combos</h2>
+            </div>
+            
+            <div className="flex overflow-x-auto gap-6 pb-6 scrollbar-hide snap-x">
+              
+              {/* Combo 1 */}
+              <div className="min-w-[320px] md:min-w-[400px] bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-6 shrink-0 snap-start group cursor-pointer hover:border-red-500 transition">
+                <div className="h-32 bg-zinc-950 mb-4 flex items-center justify-center text-zinc-800 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-red-600/5 group-hover:bg-red-600/10 transition z-10" />
+                  <img src="https://placehold.co/400x200/18181b/ef4444?text=BUNDLE" alt="Combo bundle" className="object-cover w-full h-full opacity-60" />
+                </div>
+                <h3 className="text-xl font-bold mb-1 group-hover:text-red-500 transition">The 120 FPS Starter Kit</h3>
+                <p className="text-zinc-500 text-xs mb-4">Poco X6 Pro + BlackShark Cooler 3 + Carbon Sleeves</p>
+                <div className="flex justify-between items-end">
+                  <div>
+                    <div className="text-zinc-600 line-through text-sm">₦ 360,000</div>
+                    <div className="text-2xl font-black text-red-500">₦ 345,000</div>
+                  </div>
+                  <button className="bg-white text-black p-2 hover:bg-zinc-200"><ChevronRight /></button>
+                </div>
+              </div>
+
+              {/* Combo 2 */}
+              <div className="min-w-[320px] md:min-w-[400px] bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-6 shrink-0 snap-start group cursor-pointer hover:border-red-500 transition">
+                <div className="h-32 bg-zinc-950 mb-4 flex items-center justify-center text-zinc-800 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-red-600/5 group-hover:bg-red-600/10 transition z-10" />
+                  <img src="https://placehold.co/400x200/18181b/ef4444?text=BUNDLE" alt="Combo bundle" className="object-cover w-full h-full opacity-60" />
+                </div>
+                <h3 className="text-xl font-bold mb-1 group-hover:text-red-500 transition">The Pure Value Kit</h3>
+                <p className="text-zinc-500 text-xs mb-4">Redmi Note 13 Pro + Basic Flydigi Triggers</p>
+                <div className="flex justify-between items-end">
+                  <div>
+                    <div className="text-zinc-600 line-through text-sm">₦ 285,000</div>
+                    <div className="text-2xl font-black text-red-500">₦ 275,000</div>
+                  </div>
+                  <button className="bg-white text-black p-2 hover:bg-zinc-200"><ChevronRight /></button>
+                </div>
+              </div>
+
+              {/* Combo 3 */}
+              <div className="min-w-[320px] md:min-w-[400px] bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-6 shrink-0 snap-start group cursor-pointer hover:border-red-500 transition">
+                <div className="h-32 bg-zinc-950 mb-4 flex items-center justify-center text-zinc-800 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-red-600/5 group-hover:bg-red-600/10 transition z-10" />
+                  <img src="https://placehold.co/400x200/18181b/ef4444?text=BUNDLE" alt="Combo bundle" className="object-cover w-full h-full opacity-60" />
+                </div>
+                <h3 className="text-xl font-bold mb-1 group-hover:text-red-500 transition">The Tryhard Pack</h3>
+                <p className="text-zinc-500 text-xs mb-4">Poco F6 Pro + Memo Cooler + Pro Sleeves</p>
+                <div className="flex justify-between items-end">
+                  <div>
+                    <div className="text-zinc-600 line-through text-sm">₦ 420,000</div>
+                    <div className="text-2xl font-black text-red-500">₦ 399,000</div>
+                  </div>
+                  <button className="bg-white text-black p-2 hover:bg-zinc-200"><ChevronRight /></button>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
         </div>
       </main>
     );
 
   } catch (error: any) {
-    let allowedEnums = "Unknown. Check your src/models/Product.ts file.";
-    if (error.errors && error.errors.category && error.errors.category.properties && error.errors.category.properties.enumValues) {
-      allowedEnums = JSON.stringify(error.errors.category.properties.enumValues);
-    }
-
     return (
       <div className="min-h-screen bg-black text-red-500 p-10 font-mono flex flex-col items-center justify-center">
         <ShieldAlert size={64} className="mb-4 text-red-600 animate-pulse" />
         <h1 className="text-3xl font-black uppercase mb-2">Fatal Server Crash</h1>
-        <p className="text-white text-xl mb-6">The database injection failed.</p>
-        
-        <div className="bg-red-950/30 border border-red-500/50 p-6 rounded text-left max-w-3xl w-full mb-4">
+        <div className="bg-red-950/30 border border-red-500/50 p-6 rounded text-left max-w-3xl w-full">
           <p className="font-bold text-red-400 mb-2">Exact Error Message:</p>
           <pre className="text-sm text-red-300 overflow-x-auto break-words whitespace-pre-wrap">{error.message}</pre>
-        </div>
-
-        <div className="bg-yellow-950/30 border border-yellow-500/50 p-6 rounded text-left max-w-3xl w-full">
-          <p className="font-bold text-yellow-400 mb-2">Allowed Category Enums in Database:</p>
-          <pre className="text-2xl text-yellow-300 overflow-x-auto font-black">{allowedEnums}</pre>
         </div>
       </div>
     );
   }
-          }
+                                                                                                                                                                                             }
