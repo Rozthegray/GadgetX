@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { Product } from "@/models/Product"; 
 import { 
   Gamepad2, Repeat, Wrench, Zap, Crosshair, 
-  Search, Swords, ChevronRight, Flame, ChevronLeft, Smartphone, ShieldAlert, BatteryWarning, Activity
+  Search, Swords, ChevronRight, Flame, ChevronLeft, Smartphone, ShieldAlert, BatteryWarning, Activity, Filter
 } from "lucide-react";
 
 import VersusArena from "@/components/VersusArena";
@@ -25,166 +25,100 @@ export default async function HomePage(props: {
     await mongoose.connect(process.env.MONGODB_URI as string);
   }
 
-  // ─── AUTO-SEED LOGIC ───
+  // ─── AUTO-SEED LOGIC (MASSIVE 80+ DEVICE INVENTORY) ───
   let totalProducts = await Product.countDocuments();
   
-  if (totalProducts === 0) {
+  if (totalProducts < 80) { // Re-seed if missing devices
+    await Product.deleteMany({}); // Clear old small seed
+
     const initialProducts = [
-      { name: "iPhone 13 Pro Max (256GB)", slug: "iphone-13-pro-max-256gb", priceKobo: 72000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=iPhone+13+Pro+Max" }], specs: { authenticity: "UK Used" } },
-      { name: "Poco X6 Pro 5G", slug: "poco-x6-pro-5g", priceKobo: 45000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X6+Pro" }], specs: { authenticity: "New" } },
-      { name: "RedMagic 9 Pro Gaming Phone", slug: "redmagic-9-pro", priceKobo: 125000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=RedMagic+9+Pro" }], specs: { authenticity: "New" } },
-      { name: "Samsung Galaxy S24 Ultra", slug: "samsung-s24-ultra", priceKobo: 160000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=S24+Ultra" }], specs: { authenticity: "New" } },
-      { name: "Xiaomi Pad 6 (Gaming Tablet)", slug: "xiaomi-pad-6", priceKobo: 38000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+Pad+6" }], specs: { authenticity: "New" } },
-      { name: "BlackShark Magnetic Cooler 3 Pro", slug: "blackshark-cooler-3", priceKobo: 4500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=BlackShark+Cooler" }], specs: { authenticity: "New" } },
-      { name: "Sarafox V6 Carbon Fiber Thumb Sleeves", slug: "sarafox-v6-sleeves", priceKobo: 500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Sarafox+Sleeves" }], specs: { authenticity: "New" } },
-      { name: "Flydigi Vader 3 Pro Controller", slug: "flydigi-vader-3-pro", priceKobo: 7500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Flydigi+Vader" }], specs: { authenticity: "New" } }
+      { name: "Xiaomi 15T Pro (512GB)", slug: "xiaomi-15t-pro", priceKobo: 82000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+15T+Pro" }], specs: { authenticity: "New", chipset: "Dimensity 9400+", details: "Dimensity 9400+ | 144Hz | 5500mAh" } },
+      { name: "Xiaomi 15 (512GB)", slug: "xiaomi-15-512", priceKobo: 65500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+15" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Elite", details: "Snapdragon 8 Elite | 120Hz | 5240mAh" } },
+      { name: "Xiaomi 14 Pro (1TB)", slug: "xiaomi-14-pro", priceKobo: 86000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+14+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 3", details: "Snapdragon 8 Gen 3 | 4880mAh" } },
+      { name: "Xiaomi 14 Ultra (512GB)", slug: "xiaomi-14-ultra", priceKobo: 70000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+14+Ultra" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 3", details: "Snapdragon 8 Gen 3 | 5000mAh" } },
+      { name: "Xiaomi 14 (512GB)", slug: "xiaomi-14", priceKobo: 45000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+14" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 3", details: "Snapdragon 8 Gen 3 | 4610mAh" } },
+      { name: "Xiaomi 14T (512GB)", slug: "xiaomi-14t", priceKobo: 41000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+14T" }], specs: { authenticity: "New", chipset: "Dimensity 8300 Ultra", details: "Dimensity 8300 Ultra | 5000mAh" } },
+      { name: "Xiaomi 13 Ultra (512GB)", slug: "xiaomi-13-ultra", priceKobo: 48000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+13+Ultra" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 2", details: "Snapdragon 8 Gen 2 | 5000mAh" } },
+      { name: "Xiaomi 13 Pro (512GB)", slug: "xiaomi-13-pro", priceKobo: 41000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+13+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 2", details: "Snapdragon 8 Gen 2 | 4820mAh" } },
+      { name: "Xiaomi 13T Pro (512GB)", slug: "xiaomi-13t-pro", priceKobo: 36000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+13T+Pro" }], specs: { authenticity: "New", chipset: "Dimensity 9200+", details: "Dimensity 9200+ | 5000mAh" } },
+      { name: "Xiaomi 13T (256GB)", slug: "xiaomi-13t", priceKobo: 29000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+13T" }], specs: { authenticity: "New", chipset: "Dimensity 8200 Ultra", details: "Dimensity 8200 Ultra | 5000mAh" } },
+      { name: "Xiaomi 13 Lite 5G (256GB)", slug: "xiaomi-13-lite", priceKobo: 24000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+13+Lite" }], specs: { authenticity: "New", chipset: "Snapdragon 7 Gen 1", details: "Snapdragon 7 Gen 1 | 4500mAh" } },
+      { name: "Xiaomi 12 Pro (256GB)", slug: "xiaomi-12-pro", priceKobo: 26800000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+12+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 1", details: "Snapdragon 8 Gen 1 | 4600mAh" } },
+      { name: "Xiaomi 12 (256GB)", slug: "xiaomi-12", priceKobo: 26000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+12" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 1", details: "Snapdragon 8 Gen 1 | 4500mAh" } },
+      { name: "Xiaomi 11T Pro (256GB)", slug: "xiaomi-11t-pro", priceKobo: 21000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+11T+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 888", details: "Snapdragon 888 | 5000mAh" } },
+      { name: "Xiaomi 11T (256GB)", slug: "xiaomi-11t", priceKobo: 19000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+11T" }], specs: { authenticity: "New", chipset: "Dimensity 1200", details: "Dimensity 1200 | 5000mAh" } },
+      { name: "Xiaomi 11i (256GB)", slug: "xiaomi-11i", priceKobo: 17000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+11i" }], specs: { authenticity: "New", chipset: "Dimensity 920", details: "Dimensity 920 | 5160mAh" } },
+      { name: "Xiaomi 11 Lite (128GB)", slug: "xiaomi-11-lite", priceKobo: 15000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+11+Lite" }], specs: { authenticity: "New", chipset: "Snapdragon 732G", details: "Snapdragon 732G | 4250mAh" } },
+      { name: "Xiaomi 10T Lite (128GB)", slug: "xiaomi-10t-lite", priceKobo: 14800000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Xiaomi+10T+Lite" }], specs: { authenticity: "New", chipset: "Snapdragon 750G", details: "Snapdragon 750G | 4820mAh" } },
+      { name: "Poco F8 Pro (512GB)", slug: "poco-f8-pro", priceKobo: 83200000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+F8+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Elite", details: "Snapdragon 8 Elite | 6210mAh" } },
+      { name: "Poco F6 Pro (512GB)", slug: "poco-f6-pro", priceKobo: 39500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+F6+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 2", details: "Snapdragon 8 Gen 2 | 5000mAh" } },
+      { name: "Poco F6 (512GB)", slug: "poco-f6", priceKobo: 31500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+F6" }], specs: { authenticity: "New", chipset: "Snapdragon 8s Gen 3", details: "Snapdragon 8s Gen 3 | 5000mAh" } },
+      { name: "Poco F5 (256GB)", slug: "poco-f5", priceKobo: 24000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+F5" }], specs: { authenticity: "New", chipset: "Snapdragon 7+ Gen 2", details: "Snapdragon 7+ Gen 2 | 5000mAh" } },
+      { name: "Poco X7 Pro (256GB)", slug: "poco-x7-pro", priceKobo: 28000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X7+Pro" }], specs: { authenticity: "New", chipset: "Dimensity 8400-Ultra", details: "Dimensity 8400-Ultra | 6000mAh" } },
+      { name: "Poco X7 (256GB)", slug: "poco-x7", priceKobo: 28000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X7" }], specs: { authenticity: "New", chipset: "Dimensity 7300-Ultra", details: "Dimensity 7300-Ultra | 5500mAh" } },
+      { name: "Poco X6 Pro (512GB)", slug: "poco-x6-pro", priceKobo: 31000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X6+Pro" }], specs: { authenticity: "New", chipset: "Dimensity 8300 Ultra", details: "Dimensity 8300 Ultra | 5000mAh" } },
+      { name: "Poco X6 (128GB)", slug: "poco-x6", priceKobo: 18600000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X6" }], specs: { authenticity: "New", chipset: "Snapdragon 7s Gen 2", details: "Snapdragon 7s Gen 2 | 5100mAh" } },
+      { name: "Poco X5 (256GB)", slug: "poco-x5", priceKobo: 20000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X5" }], specs: { authenticity: "New", chipset: "Snapdragon 695", details: "Snapdragon 695 | 5000mAh" } },
+      { name: "Poco X4 GT (256GB)", slug: "poco-x4-gt", priceKobo: 21500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X4+GT" }], specs: { authenticity: "New", chipset: "Dimensity 8100", details: "Dimensity 8100 | 5080mAh" } },
+      { name: "Poco X4 Pro (256GB)", slug: "poco-x4-pro", priceKobo: 17000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+X4+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 695", details: "Snapdragon 695 | 5000mAh" } },
+      { name: "Poco M8 (512GB)", slug: "poco-m8", priceKobo: 30000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Poco+M8" }], specs: { authenticity: "New", chipset: "Helio G99", details: "Helio G99 | 5160mAh" } },
+      { name: "Redmi Note 14 Pro (512GB)", slug: "redmi-note-14-pro", priceKobo: 30300000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Redmi+Note+14+Pro" }], specs: { authenticity: "New", chipset: "Dimensity 7300 Ultra", details: "Dimensity 7300 Ultra | 5500mAh" } },
+      { name: "Redmi Note 13 Pro (512GB)", slug: "redmi-note-13-pro", priceKobo: 27000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Redmi+Note+13+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 7s Gen 2", details: "Snapdragon 7s Gen 2 | 5100mAh" } },
+      { name: "Redmi Note 11 Pro+ (256GB)", slug: "redmi-note-11-pro-plus", priceKobo: 20000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Redmi+Note+11+Pro%2B" }], specs: { authenticity: "New", chipset: "Dimensity 920", details: "Dimensity 920 | 4500mAh" } },
+      { name: "Redmi Note 11 Pro (128GB)", slug: "redmi-note-11-pro", priceKobo: 15500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Redmi+Note+11+Pro" }], specs: { authenticity: "New", chipset: "Helio G96", details: "Helio G96 | 5000mAh" } },
+      { name: "Redmi 15 (256GB)", slug: "redmi-15", priceKobo: 25000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Redmi+15" }], specs: { authenticity: "New", chipset: "Snapdragon 4 Gen 2", details: "Snapdragon 4 Gen 2 | 5000mAh" } },
+      { name: "Samsung S23 Ultra (256GB)", slug: "samsung-s23-ultra", priceKobo: 63000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+S23+Ultra" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 2", details: "Snapdragon 8 Gen 2 | 5000mAh" } },
+      { name: "Samsung S23+ (256GB)", slug: "samsung-s23-plus", priceKobo: 45500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+S23%2B" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 2", details: "Snapdragon 8 Gen 2 | 4700mAh" } },
+      { name: "Samsung S23 (256GB)", slug: "samsung-s23", priceKobo: 42000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+S23" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 2", details: "Snapdragon 8 Gen 2 | 3900mAh" } },
+      { name: "Samsung S22 Ultra (128GB)", slug: "samsung-s22-ultra", priceKobo: 44500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+S22+Ultra" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 1", details: "Snapdragon 8 Gen 1 | 5000mAh" } },
+      { name: "Samsung S22+ (256GB)", slug: "samsung-s22-plus", priceKobo: 31500000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+S22%2B" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 1", details: "Snapdragon 8 Gen 1 | 4500mAh" } },
+      { name: "Samsung S22 (256GB)", slug: "samsung-s22", priceKobo: 29000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+S22" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 1", details: "Snapdragon 8 Gen 1 | 3700mAh" } },
+      { name: "Samsung A55 (256GB)", slug: "samsung-a55", priceKobo: 37000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+A55" }], specs: { authenticity: "New", chipset: "Exynos 1480", details: "Exynos 1480 | 5000mAh" } },
+      { name: "Samsung A35 (256GB)", slug: "samsung-a35", priceKobo: 27000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Samsung+A35" }], specs: { authenticity: "New", chipset: "Exynos 1380", details: "Exynos 1380 | 5000mAh" } },
+      { name: "Pixel 9 Pro XL (256GB)", slug: "pixel-9-pro-xl", priceKobo: 79000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Pixel+9+Pro+XL" }], specs: { authenticity: "New", chipset: "Tensor G4", details: "Tensor G4 | 5060mAh" } },
+      { name: "Honor Magic 6 Pro (1TB)", slug: "honor-magic-6-pro", priceKobo: 68000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Honor+Magic+6+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 3", details: "Snapdragon 8 Gen 3 | 5600mAh" } },
+      { name: "Oppo Reno 13 Pro (512GB)", slug: "oppo-reno-13-pro", priceKobo: 45000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Oppo+Reno+13+Pro" }], specs: { authenticity: "New", chipset: "Dimensity 8350", details: "Dimensity 8350 | 5900mAh" } },
+      { name: "Vivo V50 (512GB)", slug: "vivo-v50", priceKobo: 43000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Vivo+V50" }], specs: { authenticity: "New", chipset: "Snapdragon 7 Gen 3", details: "Snapdragon 7 Gen 3 | 5500mAh" } },
+      { name: "iQOO 10", slug: "iqoo-10", priceKobo: 33000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=iQOO+10" }], specs: { authenticity: "New", chipset: "Snap 8+ Gen 1", details: "Snap 8+ Gen 1 | 4700mAh" } },
+      { name: "iQOO Neo 10", slug: "iqoo-neo-10", priceKobo: 52000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=iQOO+Neo+10" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 3", details: "Snapdragon 8 Gen 3 | 5160mAh" } },
+      { name: "iQOO 12", slug: "iqoo-12", priceKobo: 74000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=iQOO+12" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 3", details: "Snapdragon 8 Gen 3 | 5000mAh" } },
+      { name: "Realme GT 5 Pro", slug: "realme-gt-5-pro", priceKobo: 85000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Realme+GT+5+Pro" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 3", details: "Snapdragon 8 Gen 3 | 5400mAh" } },
+      { name: "Redmi Turbo 5", slug: "redmi-turbo-5", priceKobo: 55000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Redmi+Turbo+5" }], specs: { authenticity: "New", chipset: "Snapdragon 8-series", details: "Snapdragon 8-series | High Fast Charge" } },
+      { name: "Red Magic 8 Pro Plus", slug: "red-magic-8-pro-plus", priceKobo: 70000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Red+Magic+8+Pro+Plus" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Gen 2", details: "Snapdragon 8 Gen 2 | 5000mAh" } },
+      { name: "Asus ROG 9", slug: "asus-rog-9", priceKobo: 150000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Asus+ROG+9" }], specs: { authenticity: "New", chipset: "Snapdragon 8 Elite", details: "Snapdragon 8 Elite | 165Hz OLED | 5800mAh" } },
+      { name: "Lenovo Y700 Gen 3", slug: "lenovo-y700-gen-3", priceKobo: 50000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Lenovo+Y700+Gen+3" }], specs: { authenticity: "New", chipset: "Snap 8 Gen 3", details: "Gaming Tablet : 8.8' 165Hz | Snap 8 Gen 3" } },
+      { name: "Lenovo Y700 Gen 2", slug: "lenovo-y700-gen-2", priceKobo: 48000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Lenovo+Y700+Gen+2" }], specs: { authenticity: "New", chipset: "Snap 8+ Gen 1", details: "Gaming Tablet : 8.8' 144Hz | Snap 8+ Gen 1" } }
     ];
     await Product.insertMany(initialProducts);
-    totalProducts = initialProducts.length; 
   }
 
-  // ─── PAGE STATES ───
+  // ─── QUERY LOGIC & FILTERS ───
   const page = Number(searchParams.page) || 1;
   const limit = 16;
   const skip = (page - 1) * limit;
-  const activeBrand = typeof searchParams.brand === 'string' ? searchParams.brand : 'Apple';
+  
+  const activeBrand = typeof searchParams.brand === 'string' ? searchParams.brand : 'All';
+  const activePrice = typeof searchParams.price === 'string' ? searchParams.price : 'All';
   const activeGame = typeof searchParams.game === 'string' ? searchParams.game : 'CODM';
 
-  const totalPages = Math.ceil(totalProducts / limit);
+  // Build the MongoDB Filter Object dynamically
+  let query: any = { status: 'published' };
   
-  const latestDrops = await Product.find({ status: 'published' }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
-  const brandProducts = await Product.find({ status: 'published', name: { $regex: activeBrand, $options: 'i' } }).limit(8).lean();
+  if (activeBrand !== 'All') {
+    query.name = { $regex: activeBrand, $options: 'i' };
+  }
+  
+  if (activePrice !== 'All') {
+    if (activePrice === '200') query.priceKobo = { $lt: 20000000 };
+    else if (activePrice === '300') query.priceKobo = { $gte: 20000000, $lt: 30000000 };
+    else if (activePrice === '400') query.priceKobo = { $gte: 30000000, $lt: 40000000 };
+    else if (activePrice === '500') query.priceKobo = { $gte: 40000000, $lt: 50000000 };
+    else if (activePrice === '600') query.priceKobo = { $gte: 50000000, $lt: 60000000 };
+    else if (activePrice === '700') query.priceKobo = { $gte: 60000000, $lt: 70000000 };
+    else if (activePrice === '700+') query.priceKobo = { $gte: 70000000 };
+  }
 
-  // ─── DYNAMIC, DEEP ANALYTICS META DATABASE ───
-  const metaHardware = {
-    'CODM': [
-      {
-        name: 'RedMagic Gaming Tab 3 Pro', type: 'TABLET', price: '₦ 1,350,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=RedMagic+Astra+Tab',
-        desc: 'The absolute apex predator of Android gaming tablets.',
-        fps: '144 FPS (MP) / 120 FPS (BR)',
-        battery: 'Massive 10000mAh. Heavy drain at 144Hz.',
-        issue: 'Custom UI (GameSpace) can feel clunky.',
-        bugStatus: 'Global Whitelist: Fully unlocked by devs.'
-      },
-      {
-        name: 'iPad Pro (M1/M2)', type: 'TABLET', price: '₦ 1,800,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=iPad+Pro',
-        desc: 'The unquestioned Battle Royale tournament standard.',
-        fps: '120 FPS (MP) / 120 FPS (BR)',
-        battery: 'Highly efficient Apple Silicon. Low heat.',
-        issue: 'Mini-LED blooming in dark environments.',
-        bugStatus: 'Stable. No global bugs. iOS is fully optimized.'
-      },
-      {
-        name: 'ROG Phone 9 Pro', type: 'PHONE', price: '₦ 1,600,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=ROG+Phone+9',
-        desc: 'Hardware beast restricted by missing developer updates.',
-        fps: '120 FPS (MP) / 90 FPS (BR)',
-        battery: 'Moderate. AeroActive cooler drastically extends life.',
-        issue: 'Should natively run 144FPS, but restricted.',
-        bugStatus: 'Global Bug: CODM developers have not updated the whitelist for this model yet.'
-      },
-      {
-        name: 'Samsung Galaxy S24 Ultra', type: 'PHONE', price: '₦ 1,600,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=S24+Ultra',
-        desc: 'Mainstream titan with incredible display clarity.',
-        fps: '120 FPS (MP) / 90 FPS (BR)',
-        battery: 'Moderate drain. GOS throttles CPU to save battery.',
-        issue: 'Requires disabling GOS via ADB for stable frame pacing.',
-        bugStatus: 'Global Issue: Samsung aggressive thermal throttling.'
-      },
-      {
-        name: 'Poco X6 Pro', type: 'PHONE', price: '₦ 450,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=Poco+X6+Pro',
-        desc: 'The undisputed budget 120 FPS king.',
-        fps: '120 FPS (MP) / 90 FPS (BR)',
-        battery: 'High drain. Will require charging between tournament rounds.',
-        issue: '120 FPS setting sometimes disappears from menu.',
-        bugStatus: 'Global Bug: Server-side UI glitch temporarily hides 120Hz.'
-      }
-    ],
-    'PUBG': [
-      {
-        name: 'Samsung Galaxy S24 Ultra', type: 'PHONE', price: '₦ 1,600,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=S24+Ultra',
-        desc: 'Officially optimized for the massive 120 FPS PUBG update.',
-        fps: '120 FPS Locked',
-        battery: 'Moderate. Vapor chamber keeps it cool.',
-        issue: 'Screen can feel too flat for 4-finger claw users.',
-        bugStatus: 'Stable.'
-      },
-      {
-        name: 'iPhone 15 Pro Max', type: 'PHONE', price: '₦ 1,550,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=iPhone+15+PM',
-        desc: 'Sustains heavy firefights in Erangel final zones.',
-        fps: '120 FPS',
-        battery: 'Excellent. Titanium chassis dissipates heat well.',
-        issue: 'Aggressive auto-dimming during extreme heat.',
-        bugStatus: 'Global Issue: iOS thermal protection dims screen natively.'
-      },
-      {
-        name: 'Poco F6 Pro', type: 'PHONE', price: '₦ 650,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=Poco+F6+Pro',
-        desc: 'Snapdragon 8 Gen 2 dominates without thermal throttling.',
-        fps: '120 FPS',
-        battery: 'High drain. Gets hot during 120 FPS drop.',
-        issue: 'Battery degrades quickly if played while charging.',
-        bugStatus: 'Age/Hardware: Battery health drops after 8 months of heavy use.'
-      }
-    ],
-    'Free Fire': [
-      {
-        name: 'iPhone 13 Pro Max', type: 'PHONE', price: '₦ 720,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=iPhone+13+PM',
-        desc: 'The classic tournament standard for Free Fire.',
-        fps: '120 FPS',
-        battery: 'Was legendary, but UK Used models have weak health.',
-        issue: 'Lightning port wears out, touch ghosting if dropped.',
-        bugStatus: 'Age Factor: Battery degradation is common due to 2021 release date.'
-      },
-      {
-        name: 'Poco X6 Pro 5G', type: 'PHONE', price: '₦ 450,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=Poco+X6+Pro',
-        desc: 'Absolute overkill for Free Fire. Runs at Max effortlessly.',
-        fps: '90-120 FPS',
-        battery: 'Excellent. barely drains on FF engine.',
-        issue: 'MediaTek chip can run hot in sunny environments.',
-        bugStatus: 'Stable.'
-      },
-      {
-        name: 'Xiaomi Pad 6', type: 'TABLET', price: '₦ 380,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=Xiaomi+Pad+6',
-        desc: 'Tablet FOV advantage makes long-range headshots too easy.',
-        fps: '144 FPS',
-        battery: 'Solid 8840mAh. Lasts all day.',
-        issue: 'Heavy to hold for 4-finger claw without a stand.',
-        bugStatus: 'Stable. HyperOS update fixed previous frame drops.'
-      }
-    ],
-    'Blood Strike': [
-      {
-        name: 'ROG Phone 8 Pro', type: 'PHONE', price: '₦ 1,400,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=ROG+Phone+8',
-        desc: 'PC-like parkour movement using the 165Hz display.',
-        fps: '165 FPS',
-        battery: 'Extreme drain at 165Hz. Requires external cooler.',
-        issue: 'AirTrigger shoulder buttons sometimes fail to register.',
-        bugStatus: 'Global Bug: Software glitch with AirTrigger mapping.'
-      },
-      {
-        name: 'RedMagic 8S Pro', type: 'PHONE', price: '₦ 850,000',
-        image: 'https://placehold.co/600x400/18181b/ef4444?text=RedMagic+8S',
-        desc: 'Centrifugal fan keeps close-quarters combat stutter-free.',
-        fps: '120 FPS',
-        battery: 'Moderate. Fan helps preserve battery chemistry.',
-        issue: 'Cooling vent accumulates dust and gets loud over time.',
-        bugStatus: 'Age Factor: Internal fans require professional cleaning after 1 year.'
-      }
-    ]
-  };
-
-  const currentMeta = metaHardware[activeGame as keyof typeof metaHardware] || metaHardware['CODM'];
+  const latestDrops = await Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
 
   return (
     <main className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-red-600 selection:text-white pb-24">
@@ -195,11 +129,10 @@ export default async function HomePage(props: {
           <div className="flex gap-6">
             <Link href="/sell" className="hover:text-red-500 transition flex items-center gap-1"><Zap size={14} /> Sell</Link>
             <Link href="/swap" className="hover:text-red-500 transition flex items-center gap-1"><Repeat size={14} /> Swap</Link>
-            <Link href="/fix" className="hover:text-red-500 transition flex items-center gap-1"><Wrench size={14} /> Fix</Link>
           </div>
           <div className="text-red-500 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-            Live Inventory: {totalProducts} Devices
+            Live Inventory: {totalProducts}+ Devices
           </div>
         </div>
       </div>
@@ -217,211 +150,97 @@ export default async function HomePage(props: {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400">Eliminate.</span>
           </h1>
           <p className="text-lg md:text-xl text-zinc-400 font-light mb-8 max-w-2xl mx-auto">
-            <span className="text-white font-bold">Fast Shipping across Nigeria.</span> Buy, swap, or repair your rig. We keep you in the lobby.
+            <span className="text-white font-bold">Fast Shipping across Nigeria.</span>
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button className="bg-red-600 text-white px-8 py-4 font-bold uppercase tracking-wider hover:bg-red-700 transition">
-              Shop Devices
-            </button>
-            <button className="border border-zinc-700 bg-zinc-900/50 text-white px-8 py-4 font-bold uppercase tracking-wider hover:border-white transition">
-              Book a Service
-            </button>
-          </div>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-4 space-y-32 py-16">
 
-        {/* 3. LATEST DROPS */}
+        {/* 3. LATEST DROPS & ADVANCED FILTERS */}
         <section id="inventory">
-          <div className="flex justify-between items-end mb-8 border-b border-zinc-900 pb-4">
-            <h2 className="text-2xl md:text-3xl font-black uppercase flex items-center gap-3">
-              <Zap className="text-red-500" /> Latest Drops
-            </h2>
-            <Link href="/store" className="text-zinc-500 hover:text-white flex items-center text-sm font-bold uppercase tracking-wider">
-              View All <ChevronRight size={16}/>
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-            {latestDrops.map((item: any) => (
-              <Link href={`/products/${item.slug}`} key={item._id.toString()} className="bg-zinc-900 border border-zinc-800 p-3 md:p-5 group hover:border-red-500 transition cursor-pointer flex flex-col">
-                <div className="aspect-square bg-zinc-950 mb-4 flex items-center justify-center overflow-hidden relative">
-                  <img 
-                    src={item.images?.[0]?.url || '/images/placeholder.jpg'} 
-                    alt={item.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                  />
-                </div>
-                <div className="flex justify-between items-start mb-1 md:mb-2 gap-2">
-                  <h3 className="text-sm md:text-lg font-bold leading-tight group-hover:text-red-500 transition">{item.name}</h3>
-                  <span className="text-[10px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 bg-zinc-800 text-zinc-300 rounded shrink-0 uppercase">
-                    {item.specs?.authenticity?.includes('Used') ? 'UK USED' : 'NEW'}
-                  </span>
-                </div>
-                <div className="mt-auto pt-4 text-lg md:text-2xl font-black text-white">
-                  {formatNaira(item.priceKobo)}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* 4. BRAND TOGGLE SECTION */}
-        <section id="brands">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 border-b border-zinc-900 pb-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-zinc-900 pb-4 gap-4">
             <h2 className="text-2xl md:text-3xl font-black uppercase flex items-center gap-3 w-full md:w-auto">
-              <Smartphone className="text-red-500" /> Select Brand
+              <Zap className="text-red-500" /> GadgetX Arsenal
             </h2>
             
-            <div className="flex overflow-x-auto gap-2 pb-2 w-full md:w-auto scrollbar-hide">
-              {['Apple', 'Samsung', 'Xiaomi', 'Poco', 'RedMagic'].map((brand) => (
-                <Link 
-                  key={brand} 
-                  href={`/?brand=${brand}#brands`}
-                  className={`px-5 py-2 text-sm font-bold uppercase tracking-wider border whitespace-nowrap transition ${
-                    activeBrand.toLowerCase() === brand.toLowerCase() 
-                    ? 'border-red-500 text-red-500 bg-red-500/10' 
-                    : 'border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600'
-                  }`}
-                >
-                  {brand}
-                </Link>
-              ))}
+            {/* BRAND FILTER */}
+            <div className="flex flex-col gap-2 w-full md:w-auto">
+              <span className="text-xs text-zinc-500 uppercase tracking-widest font-bold flex items-center gap-1"><Smartphone size={12}/> Brand</span>
+              <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
+                {['All', 'Xiaomi', 'Poco', 'Redmi', 'Samsung', 'ROG', 'Red Magic', 'Lenovo'].map((brand) => (
+                  <Link 
+                    key={brand} href={`/?brand=${brand}&price=${activePrice}#inventory`}
+                    className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider border whitespace-nowrap transition ${
+                      activeBrand === brand ? 'border-red-500 text-red-500 bg-red-500/10' : 'border-zinc-800 text-zinc-500 hover:text-white'
+                    }`}
+                  >
+                    {brand}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
 
-          {brandProducts.length > 0 ? (
+          {/* PRICE FILTER */}
+          <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+            <span className="text-xs text-zinc-500 uppercase tracking-widest font-bold flex items-center gap-1 shrink-0"><Filter size={12}/> Budget:</span>
+            {[
+              { label: 'Any', val: 'All' },
+              { label: 'Under ₦200k', val: '200' },
+              { label: '₦200k - ₦300k', val: '300' },
+              { label: '₦300k - ₦400k', val: '400' },
+              { label: '₦400k - ₦500k', val: '500' },
+              { label: '₦500k - ₦600k', val: '600' },
+              { label: '₦600k - ₦700k', val: '700' },
+              { label: '₦700k+', val: '700+' },
+            ].map((tier) => (
+              <Link 
+                key={tier.val} href={`/?brand=${activeBrand}&price=${tier.val}#inventory`}
+                className={`px-3 py-1 text-[10px] md:text-xs font-bold uppercase tracking-wider rounded-full transition whitespace-nowrap shrink-0 ${
+                  activePrice === tier.val ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                }`}
+              >
+                {tier.label}
+              </Link>
+            ))}
+          </div>
+          
+          {latestDrops.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-              {brandProducts.map((item: any) => (
-                <Link href={`/products/${item.slug}`} key={item._id.toString()} className="bg-zinc-900 border border-zinc-800 p-3 md:p-5 group hover:border-red-500 transition cursor-pointer flex flex-col">
-                  <div className="aspect-square bg-zinc-950 mb-4 flex items-center justify-center overflow-hidden">
-                    <img 
-                      src={item.images?.[0]?.url || '/images/placeholder.jpg'} 
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                    />
+              {latestDrops.map((item: any) => (
+                <Link href={`/products/${item.slug}`} key={item._id.toString()} className="bg-zinc-900 border border-zinc-800 p-3 md:p-5 group hover:border-red-500 transition cursor-pointer flex flex-col relative overflow-hidden">
+                  
+                  {/* CHIPSET BADGE */}
+                  <div className="absolute top-2 left-2 bg-black/80 backdrop-blur border border-zinc-800 text-red-500 text-[9px] md:text-[10px] font-black px-2 py-1 uppercase tracking-widest z-20 flex items-center gap-1">
+                    <Cpu size={10} /> {item.specs?.chipset || 'Flagship SoC'}
                   </div>
-                  <div className="flex justify-between items-start mb-1 md:mb-2 gap-2">
-                    <h3 className="text-sm md:text-lg font-bold leading-tight group-hover:text-red-500 transition">{item.name}</h3>
+
+                  <div className="w-full aspect-square bg-zinc-950 mb-4 flex items-center justify-center overflow-hidden relative">
+                    <img src={item.images?.[0]?.url || '/images/placeholder.jpg'} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-500 opacity-80 group-hover:opacity-100" />
                   </div>
-                  <div className="mt-auto pt-4 text-lg md:text-2xl font-black text-white">
+                  
+                  <div className="flex justify-between items-start mb-1 gap-2">
+                    <h3 className="text-xs md:text-sm font-bold leading-tight text-zinc-300 group-hover:text-white transition">{item.name}</h3>
+                  </div>
+                  
+                  <div className="mt-auto pt-3 text-sm md:text-xl font-black text-red-500">
                     {formatNaira(item.priceKobo)}
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="w-full py-16 border border-zinc-900 bg-zinc-950/50 flex flex-col items-center justify-center text-zinc-500 uppercase tracking-widest font-bold">
-              No devices currently in stock for {activeBrand}.
+            <div className="w-full py-24 border border-dashed border-zinc-800 flex flex-col items-center justify-center text-zinc-600 uppercase font-black text-xl">
+              No devices found in this price range.
             </div>
           )}
         </section>
 
-        {/* 5. INTERACTIVE VERSUS ARENA */}
+        {/* 4. INTERACTIVE VERSUS ARENA */}
         <VersusArena />
-
-        {/* 6. DYNAMIC DEEP ANALYTICS META HARDWARE */}
-        <section id="meta">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-black uppercase mb-2">Esports Technical Reports</h2>
-            <p className="text-zinc-400">Deep-dive hardware analysis. Know exactly what you are buying.</p>
-          </div>
-          
-          <div className="flex justify-center gap-2 md:gap-4 mb-8 flex-wrap">
-            {Object.keys(metaHardware).map((game) => (
-              <Link 
-                key={game} 
-                href={`/?game=${game}#meta`}
-                className={`px-6 py-3 border font-bold uppercase text-sm transition ${
-                  activeGame === game 
-                  ? 'border-red-500 text-red-500 bg-red-500/10' 
-                  : 'border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-white'
-                }`}
-              >
-                {game}
-              </Link>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentMeta.map((item) => (
-              <div key={item.name} className="bg-zinc-950 border border-zinc-900 flex flex-col group hover:border-red-500 transition relative overflow-hidden">
-                
-                {/* Visual Badge for TABLET vs PHONE */}
-                <div className="absolute top-4 left-4 bg-red-600 text-white text-[10px] font-black px-2 py-1 uppercase tracking-widest z-20">
-                  {item.type}
-                </div>
-
-                <div className="w-full h-48 bg-zinc-900 flex items-center justify-center text-zinc-800 border-b border-zinc-800 relative">
-                  <div className="absolute inset-0 bg-red-600/5 group-hover:bg-red-600/10 transition z-10" />
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100" />
-                </div>
-                
-                <div className="p-5 flex flex-col grow">
-                  <h3 className="text-xl font-bold mb-1 group-hover:text-red-500 transition">{item.name}</h3>
-                  <p className="text-zinc-400 text-xs mb-4 leading-relaxed">{item.desc}</p>
-                  
-                  {/* Technical Data Grid */}
-                  <div className="w-full text-xs space-y-3 border-t border-zinc-800 pt-4 mt-auto">
-                    <div className="flex items-start gap-2">
-                      <Activity size={14} className="text-green-500 mt-0.5 shrink-0" />
-                      <div><span className="text-zinc-500">Target:</span> <span className="font-bold text-white block">{item.fps}</span></div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <BatteryWarning size={14} className="text-yellow-500 mt-0.5 shrink-0" />
-                      <div><span className="text-zinc-500">Drain:</span> <span className="font-bold text-zinc-300 block">{item.battery}</span></div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <ShieldAlert size={14} className="text-red-500 mt-0.5 shrink-0" />
-                      <div>
-                        <span className="text-zinc-500">Report:</span> 
-                        <span className="font-bold text-zinc-300 block mb-1">{item.issue}</span>
-                        <span className={`font-bold block ${item.bugStatus.includes('Bug') || item.bugStatus.includes('Issue') ? 'text-red-400' : item.bugStatus.includes('Age') ? 'text-orange-400' : 'text-green-400'}`}>
-                          {item.bugStatus}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-lg font-black text-center text-white py-3 bg-zinc-900 border-t border-zinc-800 w-full">
-                  {item.price}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 7. COMBO CAROUSEL (Loadouts) */}
-        <section>
-          <div className="flex items-center gap-3 mb-8 border-b border-zinc-900 pb-4">
-            <Flame className="text-red-500" />
-            <h2 className="text-3xl font-black uppercase">Tactical Combos</h2>
-          </div>
-          
-          <div className="flex overflow-x-auto gap-6 pb-6 scrollbar-hide snap-x">
-            {[1, 2, 3, 4].map((combo) => (
-              <div key={combo} className="min-w-[320px] md:min-w-[400px] bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-6 shrink-0 snap-start group cursor-pointer hover:border-red-500 transition">
-                <div className="h-32 bg-zinc-950 mb-4 flex items-center justify-center text-zinc-800 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-red-600/5 group-hover:bg-red-600/10 transition z-10" />
-                  <img src="https://placehold.co/400x200/18181b/ef4444?text=BUNDLE" alt="Combo bundle" className="object-cover w-full h-full opacity-60" />
-                </div>
-                <h3 className="text-xl font-bold mb-1 group-hover:text-red-500 transition">The Sweaty Tryhard Pack</h3>
-                <p className="text-zinc-500 text-xs mb-4">Poco X6 Pro + BlackShark Cooler + Thumb Sleeves</p>
-                <div className="flex justify-between items-end">
-                  <div>
-                    <div className="text-zinc-600 line-through text-sm">₦ 430,000</div>
-                    <div className="text-2xl font-black text-red-500">₦ 399,000</div>
-                  </div>
-                  <button className="bg-white text-black p-2 hover:bg-zinc-200"><ChevronRight /></button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
       </div>
     </main>
   );
-}
+      }
