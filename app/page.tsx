@@ -71,7 +71,7 @@ export default async function HomePage(props: {
         { name: "Lenovo Y700 Gen 3", slug: "lenovo-y700-gen-3", priceKobo: 50000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Lenovo+Y700+Gen+3" }], specs: { authenticity: "New", chipset: "Snap 8 Gen 3" } }
       ];
 
-      // 🔥 ENUM FIX: Changed to UPPERCASE strings
+      // 🔥 FINAL ENUM FIX: Changed to "phones" and "tablets" EXACTLY as your database demands
       const processedProducts = rawProducts.map(p => {
         let brand = "Other";
         if (p.name.includes("Xiaomi")) brand = "Xiaomi";
@@ -86,9 +86,9 @@ export default async function HomePage(props: {
         else if (p.name.includes("ROG") || p.name.includes("Asus")) brand = "Asus";
         else if (p.name.includes("Lenovo")) brand = "Lenovo";
 
-        // *** CHANGED TO UPPERCASE ENUMS ***
-        let category = "PHONE"; 
-        if (p.name.includes("Pad") || p.name.includes("Tab") || p.name.includes("Y700")) category = "TABLET";
+        // *** PLURAL LOWERCASE TO MATCH YOUR DB! ***
+        let category = "phones"; 
+        if (p.name.includes("Pad") || p.name.includes("Tab") || p.name.includes("Y700")) category = "tablets";
 
         return {
           ...p,
@@ -213,7 +213,6 @@ export default async function HomePage(props: {
     );
 
   } catch (error: any) {
-    // 🔥 THE ENUM EXTRACTOR: Digs into the Mongoose error to find exactly what words are allowed
     let allowedEnums = "Unknown. Check your src/models/Product.ts file.";
     if (error.errors && error.errors.category && error.errors.category.properties && error.errors.category.properties.enumValues) {
       allowedEnums = JSON.stringify(error.errors.category.properties.enumValues);
@@ -230,7 +229,6 @@ export default async function HomePage(props: {
           <pre className="text-sm text-red-300 overflow-x-auto break-words whitespace-pre-wrap">{error.message}</pre>
         </div>
 
-        {/* This will print the actual exact words your database allows! */}
         <div className="bg-yellow-950/30 border border-yellow-500/50 p-6 rounded text-left max-w-3xl w-full">
           <p className="font-bold text-yellow-400 mb-2">Allowed Category Enums in Database:</p>
           <pre className="text-2xl text-yellow-300 overflow-x-auto font-black">{allowedEnums}</pre>
