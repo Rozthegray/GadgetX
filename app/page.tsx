@@ -71,7 +71,7 @@ export default async function HomePage(props: {
         { name: "Lenovo Y700 Gen 3", slug: "lenovo-y700-gen-3", priceKobo: 50000000, status: "published", images: [{ url: "https://placehold.co/600x600/18181b/ef4444?text=Lenovo+Y700+Gen+3" }], specs: { authenticity: "New", chipset: "Snap 8 Gen 3" } }
       ];
 
-      // 🔥 THE MAGIC FIX: Automatically detect brand, category, and write descriptions!
+      // 🔥 ENUM FIX: Changed "Smartphone" to "phone" and "Tablet" to "tablet" 
       const processedProducts = rawProducts.map(p => {
         let brand = "Other";
         if (p.name.includes("Xiaomi")) brand = "Xiaomi";
@@ -86,8 +86,9 @@ export default async function HomePage(props: {
         else if (p.name.includes("ROG") || p.name.includes("Asus")) brand = "Asus";
         else if (p.name.includes("Lenovo")) brand = "Lenovo";
 
-        let category = "Smartphone";
-        if (p.name.includes("Pad") || p.name.includes("Tab") || p.name.includes("Y700")) category = "Tablet";
+        // *** CHANGED THIS LINE TO MATCH STANDARD DATABASE ENUMS ***
+        let category = "phone"; 
+        if (p.name.includes("Pad") || p.name.includes("Tab") || p.name.includes("Y700")) category = "tablet";
 
         return {
           ...p,
@@ -97,7 +98,6 @@ export default async function HomePage(props: {
         };
       });
 
-      // Now insert the perfectly formatted products
       await Product.insertMany(processedProducts);
     }
 
@@ -112,7 +112,7 @@ export default async function HomePage(props: {
     let query: any = { status: 'published' };
     
     if (activeBrand !== 'All') {
-      query.brand = activeBrand; // We can actually use the DB brand field now!
+      query.brand = activeBrand;
     }
     
     if (activePrice !== 'All') {
