@@ -18,34 +18,129 @@ export default function HomePage() {
   const [activePrice, setActivePrice] = useState('All');
 
   useEffect(() => {
-    const rawProducts = [
-      { id: 1, name: "Xiaomi 15T Pro (512GB)", slug: "xiaomi-15t-pro", priceKobo: 82000000, images: [{ url: "https://images.unsplash.com/photo-1598327105666-5b89351cb315?w=600&q=80" }], specs: { chipset: "Dimensity 9400+" } },
-      { id: 2, name: "Poco F6 Pro (512GB)", slug: "poco-f6-pro", priceKobo: 39500000, images: [{ url: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=600&q=80" }], specs: { chipset: "Snapdragon 8 Gen 2" } },
-      { id: 3, name: "Samsung S24 Ultra (256GB)", slug: "samsung-s24-ultra", priceKobo: 160000000, images: [{ url: "https://images.unsplash.com/photo-1610945265064-3234ea1f10c3?w=600&q=80" }], specs: { chipset: "Snapdragon 8 Gen 3" } },
-      { id: 4, name: "Asus ROG Phone 9", slug: "asus-rog-9", priceKobo: 150000000, images: [{ url: "https://images.unsplash.com/photo-1598327105666-5b89351cb315?w=600&q=80" }], specs: { chipset: "Snapdragon 8 Elite" } },
-      { id: 5, name: "Red Magic 9 Pro", slug: "red-magic-9-pro", priceKobo: 125000000, images: [{ url: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=600&q=80" }], specs: { chipset: "Snapdragon 8 Gen 3" } },
-      { id: 6, name: "Lenovo Y700 Gen 3", slug: "lenovo-y700-gen-3", priceKobo: 50000000, images: [{ url: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&q=80" }], specs: { chipset: "Snapdragon 8 Gen 3" } },
-      { id: 7, name: "Redmi Note 14 Pro", slug: "redmi-note-14-pro", priceKobo: 30300000, images: [{ url: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&q=80" }], specs: { chipset: "Dimensity 7300 Ultra" } },
-      { id: 8, name: "iQOO 12", slug: "iqoo-12", priceKobo: 74000000, images: [{ url: "https://images.unsplash.com/photo-1598327105666-5b89351cb315?w=600&q=80" }], specs: { chipset: "Snapdragon 8 Gen 3" } }
+    // 🔥 THE COMPLETE 80+ DEVICE ARSENAL 🔥
+    const rawDevices = [
+      // Xiaomi
+      { n: "Xiaomi 15T Pro (512GB)", p: 82000000, c: "Dimensity 9400+" },
+      { n: "Xiaomi 15 (512GB)", p: 65500000, c: "Snapdragon 8 Elite" },
+      { n: "Xiaomi 15 (256GB)", p: 61500000, c: "Snapdragon 8 Elite" },
+      { n: "Xiaomi 14 Pro (1TB)", p: 86000000, c: "Snapdragon 8 Gen 3" },
+      { n: "Xiaomi 14 Ultra (512GB)", p: 70000000, c: "Snapdragon 8 Gen 3" },
+      { n: "Xiaomi 14 (512GB)", p: 45000000, c: "Snapdragon 8 Gen 3" },
+      { n: "Xiaomi 14T (512GB)", p: 41000000, c: "Dimensity 8300 Ultra" },
+      { n: "Xiaomi 13 Ultra (512GB)", p: 48000000, c: "Snapdragon 8 Gen 2" },
+      { n: "Xiaomi 13 Pro (512GB)", p: 41000000, c: "Snapdragon 8 Gen 2" },
+      { n: "Xiaomi 13T Pro (512GB)", p: 36000000, c: "Dimensity 9200+" },
+      { n: "Xiaomi 13T (256GB)", p: 29000000, c: "Dimensity 8200 Ultra" },
+      { n: "Xiaomi 13 Lite 5G (256GB)", p: 24000000, c: "Snapdragon 7 Gen 1" },
+      { n: "Xiaomi 12 Pro (256GB)", p: 26800000, c: "Snapdragon 8 Gen 1" },
+      { n: "Xiaomi 12 (256GB)", p: 26000000, c: "Snapdragon 8 Gen 1" },
+      { n: "Xiaomi 11T Pro (256GB)", p: 21000000, c: "Snapdragon 888" },
+      { n: "Xiaomi 11T (256GB)", p: 19000000, c: "Dimensity 1200" },
+      { n: "Xiaomi 11i (256GB)", p: 17000000, c: "Dimensity 920" },
+      { n: "Xiaomi 11 Lite (128GB)", p: 15000000, c: "Snapdragon 732G" },
+      { n: "Xiaomi 10T Lite (128GB)", p: 14800000, c: "Snapdragon 750G" },
+      // Poco
+      { n: "Poco F8 Pro (512GB)", p: 83200000, c: "Snapdragon 8 Elite" },
+      { n: "Poco F6 Pro (512GB)", p: 39500000, c: "Snapdragon 8 Gen 2" },
+      { n: "Poco F6 (512GB)", p: 31500000, c: "Snapdragon 8s Gen 3" },
+      { n: "Poco F5 (256GB)", p: 24000000, c: "Snapdragon 7+ Gen 2" },
+      { n: "Poco X7 Pro (256GB)", p: 28000000, c: "Dimensity 8400-Ultra" },
+      { n: "Poco X7 (256GB)", p: 28000000, c: "Dimensity 7300-Ultra" },
+      { n: "Poco X6 Pro (512GB)", p: 31000000, c: "Dimensity 8300 Ultra" },
+      { n: "Poco X6 (128GB)", p: 18600000, c: "Snapdragon 7s Gen 2" },
+      { n: "Poco X5 (256GB)", p: 20000000, c: "Snapdragon 695" },
+      { n: "Poco X4 GT (256GB)", p: 21500000, c: "Dimensity 8100" },
+      { n: "Poco X4 Pro (256GB)", p: 17000000, c: "Snapdragon 695" },
+      { n: "Poco M8 (512GB)", p: 30000000, c: "Helio G99" },
+      { n: "Poco M7 Pro (256GB)", p: 27000000, c: "Helio G99-Ultra" },
+      { n: "Poco M7 (256GB)", p: 26800000, c: "Dimensity 6100+" },
+      { n: "Poco M6 Pro (256GB)", p: 26800000, c: "Helio G99 Ultra" },
+      // Redmi
+      { n: "Redmi Note 14 Pro (512GB)", p: 30300000, c: "Dimensity 7300 Ultra" },
+      { n: "Redmi Note 13 Pro (512GB)", p: 27000000, c: "Snapdragon 7s Gen 2" },
+      { n: "Redmi Note 11 Pro+ (256GB)", p: 20000000, c: "Dimensity 920" },
+      { n: "Redmi Note 11 Pro (128GB)", p: 15500000, c: "Helio G96" },
+      { n: "Redmi Note 10S (128GB)", p: 14000000, c: "Helio G95" },
+      { n: "Redmi 15 (256GB)", p: 25000000, c: "Snapdragon 4 Gen 2" },
+      { n: "Redmi Turbo 4 Pro", p: 47500000, c: "Snapdragon 8s Gen 3" },
+      { n: "Redmi Turbo 5", p: 55000000, c: "Snapdragon 8-series" },
+      { n: "Redmi K80 5 Max", p: 60000000, c: "Dimensity 9400+" },
+      { n: "Redmi K80 Ultra", p: 80000000, c: "Dimensity 9400+" },
+      { n: "Redmi K70 Pro", p: 56000000, c: "Snapdragon 8 Gen 3" },
+      // Samsung
+      { n: "Samsung S23 Ultra (256GB)", p: 63000000, c: "Snapdragon 8 Gen 2" },
+      { n: "Samsung S23+ (256GB)", p: 45500000, c: "Snapdragon 8 Gen 2" },
+      { n: "Samsung S23 (256GB)", p: 42000000, c: "Snapdragon 8 Gen 2" },
+      { n: "Samsung S23 FE", p: 37500000, c: "Exynos 2200" },
+      { n: "Samsung S22 Ultra (128GB)", p: 44500000, c: "Exynos 2200" },
+      { n: "Samsung S22+ (256GB)", p: 31500000, c: "Exynos 2200" },
+      { n: "Samsung S22 (256GB)", p: 29000000, c: "Exynos 2200" },
+      { n: "Samsung S22 (128GB)", p: 27000000, c: "Exynos 2200" },
+      { n: "Samsung S21 (256GB)", p: 25000000, c: "Exynos 2100" },
+      { n: "Samsung Note 10+ (256GB)", p: 26500000, c: "Exynos 9825" },
+      { n: "Samsung S10+ (128GB)", p: 23800000, c: "Exynos 9820" },
+      { n: "Samsung S10 (128GB)", p: 20600000, c: "Exynos 9820" },
+      { n: "Samsung A55 (256GB)", p: 37000000, c: "Exynos 1480" },
+      { n: "Samsung A35 (256GB)", p: 27000000, c: "Exynos 1380" },
+      // Other Flagships
+      { n: "Pixel 9 Pro XL (256GB)", p: 79000000, c: "Tensor G4" },
+      { n: "Honor Magic 6 Pro (1TB)", p: 68000000, c: "Snapdragon 8 Gen 3" },
+      { n: "Honor 200 (256GB)", p: 34500000, c: "Snapdragon 7 Gen 3" },
+      { n: "Honor X9A (256GB)", p: 20900000, c: "Snapdragon 695" },
+      { n: "Oppo Reno 13 Pro (512GB)", p: 45000000, c: "Dimensity 8350" },
+      { n: "Oppo Reno 12 Pro (512GB)", p: 34500000, c: "Dimensity 7300-Energy" },
+      { n: "Oppo Reno 12 (512GB)", p: 32500000, c: "Dimensity 7300-Energy" },
+      { n: "Vivo V50 (512GB)", p: 43000000, c: "Snapdragon 7 Gen 3" },
+      // iQOO & RealMe
+      { n: "iQOO 10", p: 33000000, c: "Snap 8+ Gen 1" },
+      { n: "iQOO Z10 Turbo Pro", p: 51900000, c: "Dimensity" },
+      { n: "iQOO Neo 10", p: 52000000, c: "Snapdragon 8 Gen 3" },
+      { n: "iQOO 12", p: 74000000, c: "Snapdragon 8 Gen 3" },
+      { n: "Realme GT 5 Pro", p: 85000000, c: "Snapdragon 8 Gen 3" },
+      { n: "OnePlus Ace 6", p: 78000000, c: "Snapdragon 8 Gen 3" },
+      // Extreme Gaming & Tablets
+      { n: "Red Magic 8 Pro Plus", p: 70000000, c: "Snapdragon 8 Gen 2" },
+      { n: "Red Magic 11 Pro Max", p: 98000000, c: "Ultimate Gaming Flagship" },
+      { n: "Red Magic Nova Tablet", p: 100000000, c: "Snap 8 Gen 3 LE" },
+      { n: "Red Magic Astral", p: 125000000, c: "Gaming Flagship" },
+      { n: "Asus ROG Phone 9", p: 150000000, c: "Snapdragon 8 Elite" },
+      { n: "Lenovo Y700 Gen 3", p: 50000000, c: "Snap 8 Gen 3" },
+      { n: "Lenovo Y700 Gen 2", p: 48000000, c: "Snap 8+ Gen 1" }
     ];
 
-    const processed = rawProducts.map(p => {
+    const processed = rawDevices.map((p, index) => {
+      // Logic to auto-assign Brands based on name
       let brand = "Other";
-      if (p.name.includes("Xiaomi")) brand = "Xiaomi";
-      else if (p.name.includes("Poco")) brand = "Poco";
-      else if (p.name.includes("Redmi")) brand = "Redmi";
-      else if (p.name.includes("Samsung")) brand = "Samsung";
-      else if (p.name.includes("ROG")) brand = "ROG";
-      else if (p.name.includes("Red Magic")) brand = "Red Magic";
-      else if (p.name.includes("Lenovo")) brand = "Lenovo";
-      else if (p.name.includes("iQOO")) brand = "iQOO";
+      if (p.n.includes("Xiaomi")) brand = "Xiaomi";
+      else if (p.n.includes("Poco")) brand = "Poco";
+      else if (p.n.includes("Redmi")) brand = "Redmi";
+      else if (p.n.includes("Samsung")) brand = "Samsung";
+      else if (p.n.includes("ROG")) brand = "ROG";
+      else if (p.n.includes("Red Magic")) brand = "Red Magic";
+      else if (p.n.includes("Lenovo")) brand = "Lenovo";
+      else if (p.n.includes("iQOO")) brand = "iQOO";
 
+      // FPS Calculation Logic based on Chipset
       let fpsTarget = "60 FPS Stable";
-      const chip = p.specs.chipset.toLowerCase();
-      if (chip.includes("8 gen 2") || chip.includes("8 gen 3") || chip.includes("8 elite") || chip.includes("9400")) fpsTarget = "120 FPS Capable";
-      else if (chip.includes("7300")) fpsTarget = "90 FPS Stable";
+      const chip = p.c.toLowerCase();
+      if (chip.includes("8 gen 2") || chip.includes("8 gen 3") || chip.includes("8 elite") || chip.includes("9400") || chip.includes("9200") || chip.includes("8300")) fpsTarget = "120 FPS Capable";
+      else if (chip.includes("8 gen 1") || chip.includes("7300") || chip.includes("8100") || chip.includes("888") || chip.includes("g99-ultra") || chip.includes("tensor")) fpsTarget = "90 FPS Stable";
+      else if (chip.includes("g99") || chip.includes("g96") || chip.includes("695")) fpsTarget = "60 FPS";
 
-      return { ...p, brand, specs: { ...p.specs, fps: fpsTarget } };
+      // Dynamic Image Generator: Renders the EXACT phone name in a cool red text box
+      const shortName = p.n.split('(')[0].trim().replace(/\s+/g, '+');
+      const imageUrl = `https://placehold.co/600x800/18181b/ef4444?text=${shortName}`;
+
+      return { 
+        id: index, 
+        name: p.n, 
+        slug: shortName.toLowerCase(), 
+        priceKobo: p.p, 
+        brand: brand, 
+        images: [{ url: imageUrl }], 
+        specs: { chipset: p.c, fps: fpsTarget } 
+      };
     });
 
     setProducts(processed);
@@ -63,6 +158,8 @@ export default function HomePage() {
       if (activePrice === '300' && (p.priceKobo < 20000000 || p.priceKobo >= 30000000)) return false;
       if (activePrice === '400' && (p.priceKobo < 30000000 || p.priceKobo >= 40000000)) return false;
       if (activePrice === '500' && (p.priceKobo < 40000000 || p.priceKobo >= 50000000)) return false;
+      if (activePrice === '600' && (p.priceKobo < 50000000 || p.priceKobo >= 60000000)) return false;
+      if (activePrice === '700' && (p.priceKobo < 60000000 || p.priceKobo >= 70000000)) return false;
       if (activePrice === '700+' && p.priceKobo < 70000000) return false;
     }
     return true;
@@ -111,10 +208,10 @@ export default function HomePage() {
             </div>
             
             <div className="flex flex-col gap-6 font-black text-2xl uppercase tracking-widest">
-              <Link href="#inventory" onClick={() => setIsSidebarOpen(false)} className="hover:text-red-500">Shop Devices</Link>
-              <Link href="/sell" onClick={() => setIsSidebarOpen(false)} className="hover:text-red-500">Sell Device</Link>
-              <Link href="/swap" onClick={() => setIsSidebarOpen(false)} className="hover:text-red-500">Swap</Link>
-              <Link href="/repair" onClick={() => setIsSidebarOpen(false)} className="hover:text-red-500">Repairs</Link>
+              <Link href="#inventory" onClick={() => setIsSidebarOpen(false)} className="hover:text-red-500 transition-colors">Shop Devices</Link>
+              <Link href="/sell" onClick={() => setIsSidebarOpen(false)} className="hover:text-red-500 transition-colors">Sell Device</Link>
+              <Link href="/swap" onClick={() => setIsSidebarOpen(false)} className="hover:text-red-500 transition-colors">Swap</Link>
+              <Link href="/repair" onClick={() => setIsSidebarOpen(false)} className="hover:text-red-500 transition-colors">Repairs</Link>
             </div>
 
             <div className="mt-auto border-t border-zinc-900 pt-6">
@@ -167,7 +264,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2 mb-10 overflow-x-auto pb-2 scrollbar-hide">
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-black flex items-center gap-1 shrink-0 mr-2"><Filter size={12}/> Budget:</span>
             {[
-              { label: 'Any', val: 'All' }, { label: 'Under ₦200k', val: '200' }, { label: '₦200k - ₦300k', val: '300' }, { label: '₦300k - ₦400k', val: '400' }, { label: '₦400k - ₦500k', val: '500' }, { label: '₦700k+', val: '700+' },
+              { label: 'Any', val: 'All' }, { label: 'Under ₦200k', val: '200' }, { label: '₦200k - ₦300k', val: '300' }, { label: '₦300k - ₦400k', val: '400' }, { label: '₦400k - ₦500k', val: '500' }, { label: '₦500k - ₦600k', val: '600'}, { label: '₦600k - ₦700k', val: '700'}, { label: '₦700k+', val: '700+' },
             ].map((tier) => (
               <button key={tier.val} onClick={() => setActivePrice(tier.val)} className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-full transition whitespace-nowrap shrink-0 ${activePrice === tier.val ? 'bg-zinc-100 text-black shadow-md' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'}`}>
                 {tier.label}
@@ -182,13 +279,15 @@ export default function HomePage() {
               {filteredProducts.map((item: any) => (
                 <Link href={`/products/${item.slug}`} key={item.id} className="group relative flex flex-col bg-zinc-950 border border-zinc-800/80 hover:border-red-500/50 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_30px_rgba(220,38,38,0.15)] hover:-translate-y-1">
                   
-                  <div className="w-full aspect-[4/5] bg-zinc-900 flex items-center justify-center p-4 relative overflow-hidden">
+                  {/* Fixed Image Area with proper cropping */}
+                  <div className="w-full aspect-[4/5] bg-zinc-900 flex items-center justify-center relative overflow-hidden">
                     <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md border border-zinc-700/50 text-zinc-300 text-[9px] md:text-[10px] font-black px-2.5 py-1 uppercase tracking-widest z-20 flex items-center gap-1.5 rounded">
                       <Cpu size={10} className="text-red-500" /> {item.specs?.chipset}
                     </div>
                     <div className="absolute top-3 right-3 bg-gradient-to-r from-red-600 to-red-500 text-white text-[9px] md:text-[10px] font-black px-2.5 py-1 uppercase tracking-widest z-20 flex items-center gap-1.5 rounded shadow-[0_4px_10px_rgba(220,38,38,0.4)]">
                       <Activity size={10} /> {item.specs?.fps}
                     </div>
+                    {/* Using object-cover for stunning aesthetics without breaking layout */}
                     <img src={item.images?.[0]?.url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" />
                   </div>
 
@@ -311,7 +410,7 @@ function ComboCard({ title, desc, price, oldPrice, tag, color }: any) {
     <div className="min-w-[85vw] md:min-w-[450px] bg-zinc-950 border border-zinc-800 hover:border-red-500/50 rounded-2xl p-1 shrink-0 snap-center group cursor-pointer transition-all duration-300">
       <div className="h-40 md:h-48 bg-zinc-900 rounded-xl mb-4 flex items-center justify-center overflow-hidden relative border border-zinc-800/50">
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
-        <img src="https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=800&q=80" alt="Combo" className="object-cover w-full h-full opacity-50 group-hover:scale-105 transition-transform duration-700" />
+        <img src="https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=800&q=80" alt="Combo" className="object-cover w-full h-full opacity-30 group-hover:scale-105 transition-transform duration-700" />
         <div className="absolute bottom-4 left-4 z-20">
           <div className={`bg-${color}-600 text-white text-[10px] font-black px-2 py-1 uppercase tracking-widest rounded-sm inline-block mb-2`}>{tag}</div>
         </div>
