@@ -63,7 +63,6 @@ export async function processCheckout(
       return { success: false, error: 'Request already processing.', code: 'DUPLICATE_REQUEST' }
     }
 
-    // 🔥 FIX: We now only select the columns your database actually has!
     const existingKey = await prisma.idempotencyKey.findUnique({
       where: { key: idempotencyKey },
       select: { key: true, orderId: true },
@@ -124,11 +123,14 @@ export async function processCheckout(
           },
         })
 
-        // 🔥 FIX: We create the idempotency key and link it to the order we just created
+        // 🔥 FIX: Added the missing required fields!
         await tx.idempotencyKey.create({
           data: {
             key: idempotencyKey,
-            orderId: order.id
+            orderId: order.id,
+            userId: userId,
+            requestPath: "/checkout",
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) 
           },
         })
 
@@ -181,12 +183,9 @@ export async function processCheckout(
   }
 }
 
-// Add this to the BOTTOM of src/actions/checkout.ts
-
 export async function preFlightStockCheck(items: Array<{ productId: string, variantId?: string, quantity: number, name: string }>) {
   try {
     for (const item of items) {
-      // Look up the current stock in Postgres Vault
       const inventory = await prisma.productInventory.findUnique({
         where: {
           productId_variantId: {
@@ -209,7 +208,6 @@ export async function preFlightStockCheck(items: Array<{ productId: string, vari
       }
     }
     
-    // If it survives the loop, we are good to charge!
     return { success: true };
 
   } catch (error) {
