@@ -103,7 +103,7 @@ export async function processCheckout(
           data: {
             userId,
             shippingAddressId,
-            currency,
+            currency: 'NGN' as Currency,
             subtotalKobo,
             totalKobo,
             items: {
