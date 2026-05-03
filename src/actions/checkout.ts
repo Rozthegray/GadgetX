@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { redis, keys, TTL } from '@/lib/redis'
+import { Currency } from '@prisma/client'
 
 // ─── Input schema ────────────────────────────
 
